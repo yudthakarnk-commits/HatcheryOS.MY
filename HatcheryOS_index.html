@@ -663,6 +663,21 @@ function renderDashboard(alerts){
 /* ══════════════════════════════════════════
    PAGE: FARM SUPPLY PLAN (NEW MODULE)
    ══════════════════════════════════════════ */
+function renderCurrentWeekFarms(plans, currentWk){
+  const p=plans.find(x=>x.week_no===currentWk);
+  if(!p) return `<div style="color:var(--t3);font-size:12px">No data for W${currentWk} yet — click Add / Edit Week</div>`;
+  const maxVal=(p.total_farm_he||1)/FARMS.length*2;
+  return FARMS.map((f,i)=>`
+    <div class="supply-grid">
+      <div style="font-size:11px">${f}</div>
+      <div class="supply-bar"><div class="supply-fill" style="width:${Math.min((p[FARM_KEYS[i]]||0)/maxVal*100,100)}%;background:var(--gr)"></div></div>
+      <div class="mn tg">${fN(p[FARM_KEYS[i]]||0)}</div>
+    </div>`).join('')+`
+    <div class="sep"></div>
+    <div class="row-val"><span style="font-size:11px">Total Farm HE</span><b class="mn tg">${fN(p.total_farm_he||0)}</b></div>
+    ${p.plan_buy_he?`<div class="row-val"><span style="font-size:11px">Planned Buy</span><span class="mn ta">${fN(p.plan_buy_he)}</span></div>`:''}
+    ${p.actual_buy_he?`<div class="row-val"><span style="font-size:11px">Actual Buy</span><span class="mn tb">${fN(p.actual_buy_he)}</span></div>`:''}`;
+}
 function renderSupply(){
   const plans=state.farmPlans;
   const currentWk=isoWeek(td());
@@ -727,21 +742,7 @@ function renderSupply(){
       <div class="gr3">
         <div class="card">
           <div class="ct">Farm Production This Week (W${currentWk})</div>
-          ${()=>{
-            const p=plans.find(x=>x.week_no===currentWk);
-            if(!p) return `<div style="color:var(--t3);font-size:12px">No data for W${currentWk}</div>`;
-            return `${FARMS.map((f,i)=>`
-              <div class="supply-grid">
-                <div style="font-size:11px">${f}</div>
-                <div class="supply-bar"><div class="supply-fill" style="width:${Math.min((p[FARM_KEYS[i]]||0)/((p.total_farm_he||1)/FARMS.length*2)*100,100)}%;background:var(--gr)"></div></div>
-                <div class="mn tg">${fN(p[FARM_KEYS[i]]||0)}</div>
-              </div>`).join('')}
-              <div class="sep"></div>
-              <div class="row-val"><span style="font-size:11px">Total Farm HE</span><b class="mn tg">${fN(p.total_farm_he||0)}</b></div>
-              ${p.plan_buy_he?`<div class="row-val"><span style="font-size:11px">Planned Buy</span><span class="mn ta">${fN(p.plan_buy_he)}</span></div>`:''}
-              ${p.actual_buy_he?`<div class="row-val"><span style="font-size:11px">Actual Buy</span><span class="mn tb">${fN(p.actual_buy_he)}</span></div>`:''}
-            `;
-          })()}
+          ${renderCurrentWeekFarms(plans, currentWk)}
         </div>
         <div class="card">
           <div class="ct">Hatchery Weekly Capacity</div>
