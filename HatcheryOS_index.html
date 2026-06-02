@@ -298,6 +298,7 @@ let state = {
 function setState(patch){
   Object.assign(state, patch);
   render();
+  if(state.page==='res') setTimeout(updateCalc, 50);
 }
 
 /* ══════════════════════════════════════════
@@ -1581,13 +1582,7 @@ window.addEventListener('DOMContentLoaded', async()=>{
   await initSupabase();
 });
 
-// post-render hooks for dynamic pages
-const _render=render;
-function render(){
-  _render.call(this,...arguments);
-  // update research calc if on that page
-  if(state.page==='res') setTimeout(updateCalc,50);
-}
+
 </script>
 </body>
 </html>
