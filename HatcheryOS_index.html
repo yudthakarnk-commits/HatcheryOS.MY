@@ -5,145 +5,176 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>HatcheryOS — CPF Malaysia</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#0a0f1a;--bg2:#111827;--bg3:#1a2235;--bg4:#1f2d42;
-  --bor:#1e2d45;--bor2:#2a3d5a;
-  --t:#e8edf5;--t2:#8fa3be;--t3:#4d6380;
-  --gr:#00d4aa;--gr2:#00b894;
-  --am:#f0a500;--bl:#3d8ef8;--re:#f05252;--pu:#a78bfa;
-  --fh:'Syne',sans-serif;--fb:'DM Sans',sans-serif;--fm:'DM Mono',monospace;
-  --r:10px;--r2:14px;--sh:0 4px 24px rgba(0,0,0,.4);
+  --bg:#0d1117;--bg2:#161b22;--bg3:#21262d;--bg4:#2d333b;
+  --bor:#30363d;--bor2:#444c56;
+  --t:#e6edf3;--t2:#adbac7;--t3:#768390;
+  --gr:#3fb950;--gr2:#2ea043;--grl:rgba(63,185,80,.12);
+  --am:#d29922;--aml:rgba(210,153,34,.12);
+  --bl:#58a6ff;--bll:rgba(88,166,255,.12);
+  --re:#f85149;--rel:rgba(248,81,73,.12);
+  --pu:#bc8cff;--pul:rgba(188,140,255,.12);
+  --cy:#39c5cf;
+  --fb:'Inter',sans-serif;--fm:'JetBrains Mono',monospace;
+  --r:8px;--r2:12px;--sh:0 8px 24px rgba(0,0,0,.5);
+  --fs:13.5px;--fsl:12px;--fsxs:11px;
 }
-body{background:var(--bg);color:var(--t);font-family:var(--fb);font-size:13px;min-height:100vh;overflow-x:hidden}
-button,input,select,textarea{font-family:var(--fb)}button{cursor:pointer}
+body{background:var(--bg);color:var(--t);font-family:var(--fb);font-size:var(--fs);min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font-family:var(--fb);font-size:var(--fs)}
+button{cursor:pointer}
+/* ── Layout ── */
 .shell{display:flex;min-height:100vh}
-.sb{width:224px;background:var(--bg2);border-right:1px solid var(--bor);display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;overflow-y:auto;z-index:100}
-.main{margin-left:224px;flex:1;min-height:100vh}
-.sb-logo{padding:20px 16px 14px;border-bottom:1px solid var(--bor)}
-.sb-mark{width:32px;height:32px;background:var(--gr);border-radius:9px;display:flex;align-items:center;justify-content:center;margin-bottom:8px}
-.sb-name{font-family:var(--fh);font-size:15px;font-weight:800;letter-spacing:-.3px}
-.sb-sub{font-size:9px;color:var(--t3);font-family:var(--fm);text-transform:uppercase;letter-spacing:.8px;margin-top:1px}
-.nav{padding:10px 8px;flex:1}.nav-group{margin-bottom:16px}
-.nav-label{font-size:9px;color:var(--t3);font-family:var(--fm);text-transform:uppercase;letter-spacing:.7px;padding:0 8px;margin-bottom:4px}
-.ni{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:8px;cursor:pointer;color:var(--t2);font-size:12.5px;border:none;background:none;width:100%;text-align:left;position:relative;transition:all .15s}
-.ni:hover{background:var(--bg3);color:var(--t)}.ni.act{background:rgba(0,212,170,.1);color:var(--gr);font-weight:500}
-.ni.act::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:3px;height:60%;background:var(--gr);border-radius:0 3px 3px 0}
-.ni-badge{margin-left:auto;background:var(--re);color:#fff;font-size:9px;font-family:var(--fm);padding:1px 5px;border-radius:10px;font-weight:500}
-.sb-foot{padding:12px;border-top:1px solid var(--bor)}
-.sb-stat{background:var(--bg3);border-radius:var(--r);padding:10px 12px;margin-bottom:10px;font-size:10px;color:var(--t3);font-family:var(--fm);line-height:2}
-.sb-stat b{color:var(--t2)}
-.ubar{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:var(--r);background:var(--bg3)}
-.av{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;font-family:var(--fm);flex-shrink:0}
-.topbar{height:54px;border-bottom:1px solid var(--bor);display:flex;align-items:center;padding:0 22px;gap:12px;background:var(--bg2);position:sticky;top:0;z-index:50}
-.tbtitle{font-family:var(--fh);font-size:17px;font-weight:800;flex:1}
-.tbsub{font-size:10px;color:var(--t3);font-family:var(--fm)}
-.chip{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:10px;font-weight:500;font-family:var(--fm)}
-.cg{background:rgba(0,212,170,.12);color:var(--gr)}.ca{background:rgba(240,165,0,.12);color:var(--am)}.cb{background:rgba(61,142,248,.12);color:var(--bl)}
+.sb{width:220px;background:var(--bg2);border-right:1px solid var(--bor);display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;overflow-y:auto;z-index:100}
+.main{margin-left:220px;flex:1;min-height:100vh}
+/* ── Sidebar ── */
+.sb-logo{padding:18px 14px 12px;border-bottom:1px solid var(--bor)}
+.sb-mark{width:30px;height:30px;background:var(--gr);border-radius:7px;display:flex;align-items:center;justify-content:center;margin-bottom:8px}
+.sb-name{font-size:15px;font-weight:700;letter-spacing:-.2px;color:var(--t)}
+.sb-sub{font-size:10px;color:var(--t3);font-family:var(--fm);text-transform:uppercase;letter-spacing:.6px;margin-top:2px}
+.nav{padding:8px 6px;flex:1}
+.nav-group{margin-bottom:14px}
+.nav-label{font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.6px;padding:0 8px;margin-bottom:3px;font-weight:600}
+.ni{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:6px;cursor:pointer;color:var(--t2);font-size:var(--fsl);border:none;background:none;width:100%;text-align:left;position:relative;transition:background .12s,color .12s}
+.ni:hover{background:var(--bg3);color:var(--t)}
+.ni.act{background:rgba(63,185,80,.1);color:var(--gr);font-weight:600}
+.ni.act::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:2px;height:55%;background:var(--gr);border-radius:0 2px 2px 0}
+.ni-badge{margin-left:auto;background:var(--re);color:#fff;font-size:10px;font-family:var(--fm);padding:0 5px;border-radius:10px;font-weight:600;min-width:16px;text-align:center}
+.sb-foot{padding:10px;border-top:1px solid var(--bor)}
+.sb-stat{background:var(--bg3);border-radius:var(--r);padding:9px 12px;margin-bottom:8px;font-size:11px;color:var(--t3);font-family:var(--fm);line-height:1.9}
+.sb-stat b{color:var(--t2);font-weight:600}
+.ubar{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:var(--r);background:var(--bg3)}
+.av{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;font-family:var(--fm);flex-shrink:0}
+/* ── Topbar ── */
+.topbar{height:52px;border-bottom:1px solid var(--bor);display:flex;align-items:center;padding:0 20px;gap:10px;background:var(--bg2);position:sticky;top:0;z-index:50}
+.tbtitle{font-size:16px;font-weight:700;flex:1;letter-spacing:-.2px}
+.tbsub{font-size:11px;color:var(--t3)}
+.chip{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:20px;font-size:10px;font-weight:600;font-family:var(--fm);letter-spacing:.2px}
+.cg{background:var(--grl);color:var(--gr)}.ca{background:var(--aml);color:var(--am)}.cb{background:var(--bll);color:var(--bl)}
 .dot{width:5px;height:5px;border-radius:50%;background:currentColor;display:inline-block}
-.pg{padding:22px}
+/* ── Page ── */
+.pg{padding:20px}
+/* ── Cards ── */
 .card{background:var(--bg2);border:1px solid var(--bor);border-radius:var(--r2);padding:16px}
-.ct{font-family:var(--fm);font-size:9px;font-weight:500;color:var(--t3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px}
-.gr2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.gr3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
-.gr4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:14px}
-.kpi{padding:16px 18px}.kv{font-family:var(--fh);font-size:26px;font-weight:800;line-height:1;margin:4px 0 2px}
-.kl{font-size:9px;color:var(--t3);font-family:var(--fm);text-transform:uppercase;letter-spacing:.6px}
+.ct{font-family:var(--fm);font-size:10px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:12px}
+.gr2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.gr3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.gr4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+/* ── KPI ── */
+.kpi{padding:14px 16px}
+.kl{font-size:11px;color:var(--t3);font-weight:500;margin-bottom:4px}
+.kv{font-size:24px;font-weight:700;line-height:1.1;letter-spacing:-.5px}
 .ks{font-size:11px;color:var(--t3);margin-top:3px}
 .kbar{height:2px;background:var(--bor);border-radius:2px;margin-top:10px;overflow:hidden}
 .kbf{height:100%;border-radius:2px}
+/* ── Table ── */
 table{width:100%;border-collapse:collapse}
-th{font-size:9px;font-family:var(--fm);text-transform:uppercase;letter-spacing:.7px;color:var(--t3);padding:8px 10px;text-align:left;border-bottom:1px solid var(--bor);white-space:nowrap;background:var(--bg3)}
-th.sortable{cursor:pointer;user-select:none}
+th{font-size:10px;font-family:var(--fm);text-transform:uppercase;letter-spacing:.6px;color:var(--t3);padding:8px 10px;text-align:left;border-bottom:1px solid var(--bor);white-space:nowrap;background:var(--bg3);font-weight:600}
+th.sortable{cursor:pointer;user-select:none;transition:color .12s}
 th.sortable:hover{color:var(--t2)}
 th.sort-asc::after{content:' ▲';color:var(--gr);font-size:8px}
 th.sort-desc::after{content:' ▼';color:var(--gr);font-size:8px}
-td{padding:8px 10px;border-bottom:1px solid var(--bor);font-size:12px;vertical-align:middle}
-tr:last-child td{border-bottom:none}tr:hover td{background:rgba(255,255,255,.015)}
-.mn{font-family:var(--fm);font-size:11px}.tr{text-align:right}.ovx{overflow-x:auto}
-.bdg{display:inline-flex;align-items:center;padding:2px 7px;border-radius:20px;font-size:9px;font-weight:500;font-family:var(--fm);white-space:nowrap}
-.dg{background:rgba(0,212,170,.15);color:var(--gr)}.da{background:rgba(240,165,0,.15);color:var(--am)}
-.dr{background:rgba(240,82,82,.15);color:var(--re)}.db{background:rgba(61,142,248,.15);color:var(--bl)}
-.dp{background:rgba(167,139,250,.15);color:var(--pu)}.dm{background:var(--bg4);color:var(--t3)}
-.al{padding:9px 12px;border-radius:8px;font-size:11.5px;display:flex;align-items:flex-start;gap:8px;line-height:1.5}
-.aw{background:rgba(240,165,0,.08);border:1px solid rgba(240,165,0,.25);color:#fde68a}
-.agr{background:rgba(0,212,170,.08);border:1px solid rgba(0,212,170,.25);color:#6ee7b7}
-.are{background:rgba(240,82,82,.08);border:1px solid rgba(240,82,82,.25);color:#fca5a5}
-.abl{background:rgba(61,142,248,.08);border:1px solid rgba(61,142,248,.25);color:#93c5fd}
+td{padding:8px 10px;border-bottom:1px solid var(--bor);font-size:var(--fsl);vertical-align:middle;color:var(--t)}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(255,255,255,.02)}
+.mn{font-family:var(--fm);font-size:11px}.ta-r{text-align:right}.ovx{overflow-x:auto}
+/* ── Badges ── */
+.bdg{display:inline-flex;align-items:center;padding:2px 7px;border-radius:20px;font-size:10px;font-weight:600;font-family:var(--fm);white-space:nowrap}
+.dg{background:var(--grl);color:var(--gr)}.da{background:var(--aml);color:var(--am)}
+.dr{background:var(--rel);color:var(--re)}.db{background:var(--bll);color:var(--bl)}
+.dp{background:var(--pul);color:var(--pu)}.dm{background:var(--bg3);color:var(--t3)}
+/* ── Alerts ── */
+.al{padding:9px 12px;border-radius:var(--r);font-size:12px;display:flex;align-items:flex-start;gap:8px;line-height:1.5}
+.aw{background:var(--aml);border:1px solid rgba(210,153,34,.3);color:#e3b341}
+.agr{background:var(--grl);border:1px solid rgba(63,185,80,.3);color:#7ee787}
+.are{background:var(--rel);border:1px solid rgba(248,81,73,.3);color:#ff7b72}
+.abl{background:var(--bll);border:1px solid rgba(88,166,255,.3);color:#79c0ff}
+/* ── Forms ── */
 .fld{display:flex;flex-direction:column;gap:4px}
-.fld label{font-size:9px;font-family:var(--fm);color:var(--t3);text-transform:uppercase;letter-spacing:.5px}
-.inp{background:var(--bg3);border:1px solid var(--bor);border-radius:8px;padding:8px 10px;color:var(--t);font-size:12.5px;width:100%;outline:none;transition:border-color .15s}
-.inp:focus{border-color:var(--gr)}select.inp option{background:var(--bg3)}
+.fld label{font-size:10px;color:var(--t3);font-weight:600;text-transform:uppercase;letter-spacing:.4px}
+.inp{background:var(--bg3);border:1px solid var(--bor);border-radius:var(--r);padding:8px 10px;color:var(--t);font-size:var(--fsl);width:100%;outline:none;transition:border-color .15s}
+.inp:focus{border-color:var(--bl)}
+select.inp option{background:var(--bg3)}
 .fr2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .fr3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
-.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;font-size:12.5px;font-weight:500;border:none;cursor:pointer;transition:all .15s;white-space:nowrap}
-.bpri{background:var(--gr);color:#000;font-weight:600}.bpri:hover{background:var(--gr2)}
+/* ── Buttons ── */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border-radius:var(--r);font-size:var(--fsl);font-weight:600;border:none;cursor:pointer;transition:all .12s;white-space:nowrap}
+.bpri{background:var(--gr2);color:#fff}.bpri:hover{background:var(--gr)}
 .bsec{background:var(--bg3);color:var(--t2);border:1px solid var(--bor)}.bsec:hover{background:var(--bg4);color:var(--t)}
 .bsm{padding:4px 9px;font-size:11px}
-.tabs{display:flex;gap:2px;border-bottom:1px solid var(--bor);margin-bottom:16px}
-.tab{padding:7px 14px;font-size:12px;cursor:pointer;color:var(--t3);border:none;background:none;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s}
-.tab.act{color:var(--gr);border-bottom-color:var(--gr)}.tab:hover:not(.act){color:var(--t2)}
+/* ── Tabs ── */
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--bor);margin-bottom:14px}
+.tab{padding:7px 13px;font-size:12px;cursor:pointer;color:var(--t3);border:none;background:none;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .12s;font-weight:500}
+.tab.act{color:var(--gr);border-bottom-color:var(--gr)}
+.tab:hover:not(.act){color:var(--t2)}
+/* ── Modal ── */
 .mov{position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;z-index:200;padding:16px;backdrop-filter:blur(4px)}
-.mo{background:var(--bg2);border:1px solid var(--bor2);border-radius:16px;width:100%;max-width:580px;max-height:88vh;overflow-y:auto}
+.mo{background:var(--bg2);border:1px solid var(--bor2);border-radius:14px;width:100%;max-width:580px;max-height:90vh;overflow-y:auto}
 .moh{padding:14px 18px;border-bottom:1px solid var(--bor);display:flex;align-items:center;justify-content:space-between}
-.mot{font-family:var(--fh);font-size:14px;font-weight:800}
+.mot{font-size:14px;font-weight:700}
 .mob{padding:18px}.mof{padding:12px 18px;border-top:1px solid var(--bor);display:flex;justify-content:flex-end;gap:8px}
+/* ── Misc ── */
 .fl{display:flex}.aic{align-items:center}.jb{justify-content:space-between}
-.mt4{margin-top:4px}.mt8{margin-top:8px}.mt12{margin-top:12px}.mt16{margin-top:16px}.mt20{margin-top:20px}
+.mt4{margin-top:4px}.mt8{margin-top:8px}.mt12{margin-top:12px}.mt16{margin-top:16px}
 .mb4{margin-bottom:4px}.mb8{margin-bottom:8px}.mb12{margin-bottom:12px}.mb16{margin-bottom:16px}
 .w100{width:100%}
-.box{background:var(--bg3);border:1px solid var(--bor);border-radius:9px;padding:11px 14px;font-size:11.5px;color:var(--t2);line-height:1.8}
-.sep{height:1px;background:var(--bor);margin:12px 0}
+.box{background:var(--bg3);border:1px solid var(--bor);border-radius:var(--r);padding:11px 14px;font-size:12px;color:var(--t2);line-height:1.8}
+.sep{height:1px;background:var(--bor);margin:10px 0}
 .pbar{height:4px;background:var(--bor);border-radius:2px;overflow:hidden}
 .pbf{height:100%;border-radius:2px;transition:width .4s}
 .tg{color:var(--gr)}.ta{color:var(--am)}.tb{color:var(--bl)}.tr2{color:var(--re)}.tp{color:var(--pu)}
 .cA{color:var(--gr)}.cB{color:var(--bl)}.cC{color:var(--am)}
-.row-val{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.row-val{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;font-size:12px}
 .row-val:last-child{margin-bottom:0}
-.ring{position:relative;display:inline-flex;align-items:center;justify-content:center}
-.rinn{position:absolute;text-align:center}
+/* ── Progress card ── */
+.prog-card{background:var(--bg3);border-radius:var(--r);padding:11px 13px;border:1px solid var(--bor)}
+.prog-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:7px}
+/* ── Timeline ── */
 .tline{display:flex}
 .tls{flex:1;display:flex;flex-direction:column;align-items:center;position:relative}
 .tls:not(:last-child)::after{content:'';position:absolute;top:12px;left:50%;width:100%;height:2px;z-index:0}
 .tld{width:24px;height:24px;border-radius:50%;border:2px solid var(--bor);background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:9px;font-family:var(--fm);position:relative;z-index:1}
 .tll{font-size:9px;font-family:var(--fm);margin-top:4px;text-align:center;max-width:52px;line-height:1.3;color:var(--t3)}
-.tls.done .tld{border-color:var(--gr);background:rgba(0,212,170,.15);color:var(--gr)}
+.tls.done .tld{border-color:var(--gr);background:var(--grl);color:var(--gr)}
 .tls.done::after{background:var(--gr)!important}
-.tls.curr .tld{border-color:var(--am);background:rgba(240,165,0,.15);color:var(--am)}
+.tls.curr .tld{border-color:var(--am);background:var(--aml);color:var(--am)}
 .tls.fut::after{background:var(--bor)!important}
 .tls.done .tll{color:var(--gr)}.tls.curr .tll{color:var(--am)}
-.dbar{display:flex;gap:2px;height:22px;border-radius:6px;overflow:hidden}
-.dseg{flex:1;display:flex;align-items:center;justify-content:center;font-size:8px;font-family:var(--fm);color:rgba(0,0,0,.8);font-weight:600;border-radius:2px}
-/* filter bar */
-.fbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:14px}
-.fbar select,.fbar input{background:var(--bg3);border:1px solid var(--bor);border-radius:7px;padding:6px 10px;color:var(--t2);font-size:12px;outline:none}
-.fbar select:focus,.fbar input:focus{border-color:var(--gr)}
-/* supply */
-.supply-bar{height:8px;border-radius:4px;overflow:hidden;background:var(--bor);flex:1}
-.supply-fill{height:100%;border-radius:4px}
-.supply-grid{display:grid;grid-template-columns:110px 1fr auto;gap:10px;align-items:center;margin-bottom:8px}
-/* gap badge */
+/* ── Filter bar ── */
+.fbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.fbar select,.fbar input{background:var(--bg3);border:1px solid var(--bor);border-radius:var(--r);padding:6px 10px;color:var(--t2);font-size:12px;outline:none;font-family:var(--fb)}
+.fbar select:focus,.fbar input:focus{border-color:var(--bl)}
+/* ── Supply bars ── */
+.sbar{height:6px;border-radius:3px;overflow:hidden;background:var(--bor);flex:1}
+.sfill{height:100%;border-radius:3px}
+.sgrid{display:grid;grid-template-columns:120px 1fr 80px;gap:10px;align-items:center;margin-bottom:7px}
+/* ── Gap ── */
 .gap-pos{color:var(--gr);font-weight:600}.gap-neg{color:var(--re);font-weight:600}.gap-neu{color:var(--t3)}
-/* demand-supply matrix */
-.ds-card{background:var(--bg3);border:1px solid var(--bor);border-radius:var(--r);padding:12px 14px;margin-bottom:10px}
-.ds-hdr{font-size:12px;font-weight:600;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between}
-/* prog */
-.prog-card{background:var(--bg3);border-radius:var(--r);padding:12px 14px;border:1px solid var(--bor)}
-.prog-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
-/* toast */
+/* ── Cool room hatchery panel ── */
+.cr-panel{border:1px solid var(--bor);border-radius:var(--r2);overflow:hidden;margin-bottom:14px}
+.cr-panel-head{background:var(--bg3);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--bor)}
+.cr-panel-body{padding:0}
+.cr-farm-row{display:grid;grid-template-columns:110px 80px 80px 80px 80px 1fr;gap:0;border-bottom:1px solid var(--bor)}
+.cr-farm-row:last-child{border-bottom:none}
+.cr-cell{padding:8px 12px;font-size:12px;display:flex;align-items:center}
+.cr-head-row{display:grid;grid-template-columns:110px 80px 80px 80px 80px 1fr;gap:0;background:var(--bg4);border-bottom:1px solid var(--bor)}
+.cr-hcell{padding:7px 12px;font-size:10px;font-family:var(--fm);color:var(--t3);text-transform:uppercase;letter-spacing:.5px;font-weight:600}
+/* ── Supply sticky header area ── */
+.supply-sticky{position:sticky;top:52px;z-index:40;background:var(--bg);padding:12px 20px;border-bottom:1px solid var(--bor);display:flex;align-items:center;justify-content:space-between;gap:12px}
+/* ── Toast ── */
 .toast-wrap{position:fixed;bottom:24px;right:24px;z-index:999;display:flex;flex-direction:column;gap:8px}
-.toast{background:var(--bg2);border:1px solid var(--bor);border-radius:10px;padding:11px 16px;font-size:12.5px;box-shadow:var(--sh);display:flex;align-items:center;gap:10px;min-width:240px;animation:slideIn .2s ease}
-.toast.success{border-color:rgba(0,212,170,.4)}.toast.error{border-color:rgba(240,82,82,.4)}
+.toast{background:var(--bg2);border:1px solid var(--bor);border-radius:var(--r);padding:10px 14px;font-size:12px;box-shadow:var(--sh);display:flex;align-items:center;gap:10px;min-width:220px;animation:slideIn .2s ease}
+.toast.success{border-color:rgba(63,185,80,.4)}.toast.error{border-color:rgba(248,81,73,.4)}
 @keyframes slideIn{from{transform:translateX(40px);opacity:0}to{transform:translateX(0);opacity:1}}
-.loading{display:flex;align-items:center;justify-content:height:200px;color:var(--t3);font-family:var(--fm);font-size:12px;padding:48px;justify-content:center}
+.loading{display:flex;align-items:center;justify-content:center;height:200px;color:var(--t3);font-size:12px}
 @keyframes spin{to{transform:rotate(360deg)}}
-.spinner{width:18px;height:18px;border:2px solid var(--bor);border-top-color:var(--gr);border-radius:50%;animation:spin .7s linear infinite;margin-right:10px;flex-shrink:0}
-.lw{position:fixed;inset:0;background:linear-gradient(135deg,#0a0f1a 0%,#0d1f35 100%);display:flex;align-items:center;justify-content:center;z-index:999}
-.lb{width:420px;background:var(--bg2);border:1px solid var(--bor2);border-radius:18px;padding:34px 30px;box-shadow:var(--sh)}
-::-webkit-scrollbar{width:5px;height:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--bor2);border-radius:3px}
+.spinner{width:16px;height:16px;border:2px solid var(--bor);border-top-color:var(--gr);border-radius:50%;animation:spin .7s linear infinite;margin-right:8px;flex-shrink:0}
+.lw{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:999}
+.lb{width:400px;background:var(--bg2);border:1px solid var(--bor2);border-radius:14px;padding:30px;box-shadow:var(--sh)}
+::-webkit-scrollbar{width:6px;height:6px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--bor2);border-radius:3px}
 </style>
 </head>
 <body>
@@ -152,31 +183,21 @@ tr:last-child td{border-bottom:none}tr:hover td{background:rgba(255,255,255,.015
 <script>
 'use strict';
 
-const SB_URL = 'https://ncnppcmlxdaabuwkcbtm.supabase.co';
-const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5jbnBwY21seGRhYWJ1d2tjYnRtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcxNjg3NTEsImV4cCI6MjA5Mjc0NDc1MX0.bfUzVo4WvMdjAtZl9NdCf8Q7CScghg-oWTRFLlhHaTs';
-let sb = null;
+const SB_URL='https://ncnppcmlxdaabuwkcbtm.supabase.co';
+const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5jbnBwY21seGRhYWJ1d2tjYnRtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcxNjg3NTEsImV4cCI6MjA5Mjc0NDc1MX0.bfUzVo4WvMdjAtZl9NdCf8Q7CScghg-oWTRFLlhHaTs';
+let sb=null;
 
-const FARMS     = ['Rantau','Sg. Sayong','Ulu Tiram','Kluang','Sg. Siput'];
-const FARM_KEYS = ['farm_rantau','farm_sg_sayong','farm_ulu_tiram','farm_kluang','farm_sg_siput'];
-const HATCH     = [
-  {name:'Chengkau',  typ:'SS',wc:774144},
-  {name:'Kluang',    typ:'SS',wc:345600},
-  {name:'K.Kangsar', typ:'MS',wc:622080},
-  {name:'Sg. Sayong',typ:'MS',wc:311040},
-];
-const HN        = HATCH.map(h=>h.name);
-const BREEDS    = ['Ross 308','Cobb 500','Hubbard'];
-const BC        = ['cA','cB','cC'];
-const bI        = b=>b==='Ross 308'?0:b==='Cobb 500'?1:2;
-const TOTAL_CAP = HATCH.reduce((s,h)=>s+h.wc,0);
+const FARMS=['Rantau','Sg. Sayong','Ulu Tiram','Kluang','Sg. Siput'];
+const FARM_KEYS=['farm_rantau','farm_sg_sayong','farm_ulu_tiram','farm_kluang','farm_sg_siput'];
+const HATCH=[{name:'Chengkau',typ:'SS',wc:774144},{name:'Kluang',typ:'SS',wc:345600},{name:'K.Kangsar',typ:'MS',wc:622080},{name:'Sg. Sayong',typ:'MS',wc:311040}];
+const HN=HATCH.map(h=>h.name);
+const BREEDS=['Ross 308','Cobb 500','Hubbard'];
+const BC=['cA','cB','cC'];
+const bI=b=>b==='Ross 308'?0:b==='Cobb 500'?1:2;
+const TOTAL_CAP=HATCH.reduce((s,h)=>s+h.wc,0);
 
-const STD = {
-  'Ross 308':{24:72,25:75,26:78,27:81,28:83,29:85,30:86,31:87,32:87,33:86,34:85,35:84,36:83,37:81,38:79,39:77,40:74,41:72,42:69,43:67,44:65,45:63,46:61,47:59,48:57,49:55,50:53},
-  'Cobb 500':{24:70,25:73,26:76,27:79,28:82,29:84,30:85,31:86,32:86,33:85,34:84,35:82,36:80,37:78,38:76,39:74,40:71,41:68,42:65,43:63,44:61,45:59,46:57,47:55,48:53,49:51,50:49},
-  'Hubbard' :{24:68,25:71,26:74,27:77,28:80,29:82,30:83,31:84,32:84,33:83,34:82,35:80,36:78,37:76,38:74,39:72,40:69,41:66,42:63,43:61,44:59,45:57,46:55,47:53,48:51,49:49,50:47},
-};
+const STD={'Ross 308':{24:72,25:75,26:78,27:81,28:83,29:85,30:86,31:87,32:87,33:86,34:85,35:84,36:83,37:81,38:79,39:77,40:74,41:72,42:69,43:67,44:65,45:63,46:61,47:59,48:57,49:55,50:53},'Cobb 500':{24:70,25:73,26:76,27:79,28:82,29:84,30:85,31:86,32:86,33:85,34:84,35:82,36:80,37:78,38:76,39:74,40:71,41:68,42:65,43:63,44:61,45:59,46:57,47:55,48:53,49:51,50:49},'Hubbard':{24:68,25:71,26:74,27:77,28:80,29:82,30:83,31:84,32:84,33:83,34:82,35:80,36:78,37:76,38:74,39:72,40:69,41:66,42:63,43:61,44:59,45:57,46:55,47:53,48:51,49:49,50:47}};
 
-// ── UTILS ──
 const gS=(b,w)=>{const t=STD[b]||STD['Ross 308'],k=Object.keys(t).map(Number).sort((a,z)=>a-z);if(w<=k[0])return t[k[0]];if(w>=k[k.length-1])return t[k[k.length-1]];return t[w]||t[k.reduce((p,x)=>Math.abs(x-w)<Math.abs(p-w)?x:p,k[0])];};
 const dc=(d,w)=>{let r=0;for(let i=1;i<=d;i++)r+=(i<=7?.2:.5)+(w>38&&i>5?.1:0);return parseFloat(r.toFixed(2));};
 const aH=(b,w,d)=>Math.max(parseFloat((gS(b,w)-dc(d,w)).toFixed(1)),0);
@@ -186,389 +207,260 @@ const dD=(a,b)=>Math.floor((new Date(b)-new Date(a))/86400000);
 const fD=d=>new Date(d).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
 const fS=d=>new Date(d).toLocaleDateString('en-GB',{day:'2-digit',month:'short'});
 const fN=n=>typeof n==='number'?n.toLocaleString():n||'—';
-const cC=p=>p>1?'#f05252':p>=.85?'#00d4aa':p>=.6?'#f0a500':'#f05252';
+const cC=p=>p>1?'var(--re)':p>=.85?'var(--gr)':p>=.6?'var(--am)':'var(--re)';
 const cL=p=>p>1?'Over Cap':p>=.85?'Optimal':p>=.6?'Good':'Low';
 const isoWeek=d=>{const dt=new Date(d);dt.setHours(0,0,0,0);dt.setDate(dt.getDate()+3-(dt.getDay()+6)%7);const wk1=new Date(dt.getFullYear(),0,4);return 1+Math.round(((dt-wk1)/86400000-3+(wk1.getDay()+6)%7)/7);};
+const weekStart=d=>{const dt=new Date(d);const day=dt.getDay()||7;dt.setDate(dt.getDate()-day+1);return dt.toISOString().split('T')[0];};
 const esc=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 
-// ── TOAST ──
-function toast(msg,type='success'){
-  const w=document.getElementById('toastWrap');
-  const d=document.createElement('div');
-  const ico=type==='success'?'✓':type==='error'?'✕':'ℹ';
-  const col=type==='success'?'var(--gr)':type==='error'?'var(--re)':'var(--bl)';
-  d.className='toast '+type;
-  d.innerHTML='<span style="color:'+col+';font-weight:700;font-family:var(--fm)">'+ico+'</span>'+esc(msg);
-  w.appendChild(d);setTimeout(()=>d.remove(),3500);
-}
+// ── Toast ──
+function toast(msg,type='success'){const w=document.getElementById('toastWrap');const d=document.createElement('div');d.className='toast '+type;const col=type==='success'?'var(--gr)':type==='error'?'var(--re)':'var(--bl)';d.innerHTML='<span style="color:'+col+';font-weight:700">'+(type==='success'?'✓':type==='error'?'✕':'ℹ')+'</span>'+esc(msg);w.appendChild(d);setTimeout(()=>d.remove(),3500);}
 
-// ── STATE ──
-let state = {
-  user:null, page:'db', loading:false,
-  lots:[], settings:[], farmPlans:[], docTargets:[],
+// ── State ──
+let state={
+  user:null,page:'db',loading:false,
+  lots:[],settings:[],farmPlans:[],docTargets:[],
   sortLots:{col:'recv_date',dir:-1},
   sortSett:{col:'hatch_date',dir:1},
   sortCool:{col:'recv_date',dir:-1},
-  fLotH:'', fLotS:'', fCoolH:'',
-  fSchedH:'', fSchedS:'',
+  fLotH:'',fLotS:'',fCoolH:'',fSchedH:'',fSchedS:'',fFcWk:'',
 };
-
 function setState(p){Object.assign(state,p);render();if(state.page==='res')setTimeout(updateCalc,50);}
+function sortData(arr,col,dir){return[...arr].sort((a,b)=>{const av=a[col]??'',bv=b[col]??'';return(typeof av==='number'?(av-bv):String(av).localeCompare(String(bv)))*dir;});}
+function toggleSort(key,col){const s=state[key];setState({[key]:{col,dir:s.col===col?-s.dir:1}});}
+function thS(key,col,label){const s=state[key];return '<th class="sortable'+(s.col===col?' '+(s.dir===1?'sort-asc':'sort-desc'):'')+'" onclick="toggleSort(\''+key+'\',\''+col+'\')">'+label+'</th>';}
 
-function sortData(arr, col, dir){
-  return [...arr].sort((a,b)=>{
-    const av=a[col]??'', bv=b[col]??'';
-    if(typeof av==='number') return (av-bv)*dir;
-    return String(av).localeCompare(String(bv))*dir;
-  });
-}
-function toggleSort(key, col){
-  const cur=state[key];
-  const dir=cur.col===col?-cur.dir:1;
-  setState({[key]:{col,dir}});
-}
-function thSort(key,col,label){
-  const s=state[key];
-  const cls=s.col===col?(s.dir===1?'sort-asc':'sort-desc'):'';
-  return '<th class="sortable '+cls+'" onclick="toggleSort(\''+key+'\',\''+col+'\')">'+label+'</th>';
-}
+// ── Supabase ──
+async function initSupabase(){sb=supabase.createClient(SB_URL,SB_KEY);const{data:{session}}=await sb.auth.getSession();if(session)await afterLogin(session.user);else showLogin();}
+async function afterLogin(user){setState({user,loading:true});await loadAll();setState({loading:false});sb.channel('h-os').on('postgres_changes',{event:'*',schema:'public',table:'egg_lots'},()=>loadLots()).on('postgres_changes',{event:'*',schema:'public',table:'egg_settings'},()=>loadSettings()).on('postgres_changes',{event:'*',schema:'public',table:'farm_egg_plan'},()=>loadFarmPlans()).on('postgres_changes',{event:'*',schema:'public',table:'doc_targets'},()=>loadDocTargets()).subscribe();}
+async function loadAll(){await Promise.all([loadLots(),loadSettings(),loadFarmPlans(),loadDocTargets()]);}
+async function loadLots(){try{const{data,error}=await sb.from('egg_lots').select('*').order('recv_date',{ascending:false});if(!error)setState({lots:data||[]});}catch(e){}}
+async function loadSettings(){try{const{data,error}=await sb.from('egg_settings').select('*').order('hatch_date',{ascending:true});if(!error)setState({settings:data||[]});}catch(e){}}
+async function loadFarmPlans(){try{const{data,error}=await sb.from('farm_egg_plan').select('*').order('week_no',{ascending:true}).limit(60);if(!error)setState({farmPlans:data||[]});}catch(e){}}
+async function loadDocTargets(){try{const{data,error}=await sb.from('doc_targets').select('*').order('target_week',{ascending:true});if(!error)setState({docTargets:data||[]});}catch(e){}}
 
-// ── SUPABASE ──
-async function initSupabase(){
-  sb=supabase.createClient(SB_URL,SB_KEY);
-  const {data:{session}}=await sb.auth.getSession();
-  if(session) await afterLogin(session.user); else showLogin();
-}
-async function afterLogin(user){
-  setState({user,loading:true});
-  await loadAll();
-  setState({loading:false});
-  sb.channel('hatchery-os')
-    .on('postgres_changes',{event:'*',schema:'public',table:'egg_lots'},()=>loadLots())
-    .on('postgres_changes',{event:'*',schema:'public',table:'egg_settings'},()=>loadSettings())
-    .on('postgres_changes',{event:'*',schema:'public',table:'farm_egg_plan'},()=>loadFarmPlans())
-    .on('postgres_changes',{event:'*',schema:'public',table:'doc_targets'},()=>loadDocTargets())
-    .subscribe();
-}
-async function loadAll(){
-  await Promise.all([loadLots(),loadSettings(),loadFarmPlans(),loadDocTargets()]);
-}
-async function loadLots(){
-  try{const {data,error}=await sb.from('egg_lots').select('*').order('recv_date',{ascending:false});if(!error)setState({lots:data||[]});}catch(e){}
-}
-async function loadSettings(){
-  try{const {data,error}=await sb.from('egg_settings').select('*').order('hatch_date',{ascending:true});if(!error)setState({settings:data||[]});}catch(e){}
-}
-async function loadFarmPlans(){
-  try{const {data,error}=await sb.from('farm_egg_plan').select('*').order('week_no',{ascending:true}).limit(60);if(!error)setState({farmPlans:data||[]});}catch(e){}
-}
-async function loadDocTargets(){
-  try{const {data,error}=await sb.from('doc_targets').select('*').order('target_week',{ascending:true});if(!error)setState({docTargets:data||[]});}catch(e){}
-}
 function showLogin(){document.getElementById('root').innerHTML=renderLogin();document.getElementById('loginPw').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});}
-async function doLogin(){
-  const email=document.getElementById('loginEmail').value.trim();
-  const pw=document.getElementById('loginPw').value;
-  const err=document.getElementById('loginErr');
-  err.style.display='none';
-  if(!email||!pw){err.textContent='Please enter email and password.';err.style.display='flex';return;}
-  const {data,error}=await sb.auth.signInWithPassword({email,password:pw});
-  if(error){err.textContent=error.message;err.style.display='flex';return;}
-  await afterLogin(data.user);
-}
+async function doLogin(){const em=document.getElementById('loginEmail').value.trim(),pw=document.getElementById('loginPw').value,err=document.getElementById('loginErr');err.style.display='none';if(!em||!pw){err.textContent='Please enter email and password.';err.style.display='flex';return;}const{data,error}=await sb.auth.signInWithPassword({email:em,password:pw});if(error){err.textContent=error.message;err.style.display='flex';return;}await afterLogin(data.user);}
 async function doLogout(){await sb.auth.signOut();setState({user:null,lots:[],settings:[],farmPlans:[],docTargets:[]});showLogin();}
 
-// ── ICONS ──
-function ic(n,s=14,col=''){
-  col=col||'currentColor';
-  if(n==='egg') return '<svg width="'+s+'" height="'+s+'" viewBox="0 0 24 24" fill="none" stroke="'+col+'" stroke-width="1.8"><ellipse cx="12" cy="13" rx="6" ry="8"/><path d="M12 5V2"/></svg>';
-  if(n==='truck') return '<svg width="'+s+'" height="'+s+'" viewBox="0 0 24 24" fill="none" stroke="'+col+'" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>';
-  if(n==='cal') return '<svg width="'+s+'" height="'+s+'" viewBox="0 0 24 24" fill="none" stroke="'+col+'" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>';
-  const paths={home:'M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z',temp:'M14 14.76V3.5a2.5 2.5 0 00-5 0v11.26a4.5 4.5 0 105 0z',trend:'M23 6L13.5 15.5 8.5 10.5 1 18',chart:'M18 20V10M12 20V4M6 20v-6',doc:'M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8zM14 2v6h6',lab:'M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v11l-4 8h14l-4-8V3',farm:'M3 9l9-7 9 7v11H3zM9 22V12h6v10',plus:'M12 5v14M5 12h14',out:'M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9',info:'M12 2a10 10 0 100 20 10 10 0 000-20zM12 8v4M12 16h.01',alert:'M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0zM12 9v4M12 17h.01',refresh:'M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15',bulb:'M9 18h6M10 22h4M12 2C8.13 2 5 5.13 5 9c0 2.38 1.19 4.47 3 5.74V17a2 2 0 002 2h4a2 2 0 002-2v-2.26C17.81 13.47 19 11.38 19 9c0-3.87-3.13-7-7-7z'};
-  const d=paths[n];
-  if(!d) return '<svg width="'+s+'" height="'+s+'" viewBox="0 0 24 24" fill="none" stroke="'+col+'" stroke-width="1.8"><circle cx="12" cy="12" r="4"/></svg>';
-  return '<svg width="'+s+'" height="'+s+'" viewBox="0 0 24 24" fill="none" stroke="'+col+'" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="'+d+'"/></svg>';
+// ── Icons ──
+function ic(n,s=14,col=''){col=col||'currentColor';
+  if(n==='egg')return'<svg width="'+s+'" height="'+s+'" viewBox="0 0 24 24" fill="none" stroke="'+col+'" stroke-width="1.8"><ellipse cx="12" cy="13" rx="6" ry="8"/><path d="M12 5V2"/></svg>';
+  if(n==='truck')return'<svg width="'+s+'" height="'+s+'" viewBox="0 0 24 24" fill="none" stroke="'+col+'" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>';
+  if(n==='cal')return'<svg width="'+s+'" height="'+s+'" viewBox="0 0 24 24" fill="none" stroke="'+col+'" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>';
+  const P={home:'M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z',temp:'M14 14.76V3.5a2.5 2.5 0 00-5 0v11.26a4.5 4.5 0 105 0z',trend:'M23 6L13.5 15.5 8.5 10.5 1 18',chart:'M18 20V10M12 20V4M6 20v-6',doc:'M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8zM14 2v6h6',lab:'M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v11l-4 8h14l-4-8V3',farm:'M3 9l9-7 9 7v11H3zM9 22V12h6v10',plus:'M12 5v14M5 12h14',out:'M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9',info:'M12 2a10 10 0 100 20 10 10 0 000-20zM12 8v4M12 16h.01',alert:'M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0zM12 9v4M12 17h.01',refresh:'M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15',bulb:'M9 18h6M10 22h4M12 2C8.13 2 5 5.13 5 9c0 2.38 1.19 4.47 3 5.74V17a2 2 0 002 2h4a2 2 0 002-2v-2.26C17.81 13.47 19 11.38 19 9c0-3.87-3.13-7-7-7z'};
+  const d=P[n];if(!d)return'<svg width="'+s+'" height="'+s+'" viewBox="0 0 24 24" fill="none" stroke="'+col+'" stroke-width="1.8"><circle cx="12" cy="12" r="4"/></svg>';
+  return'<svg width="'+s+'" height="'+s+'" viewBox="0 0 24 24" fill="none" stroke="'+col+'" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="'+d+'"/></svg>';
 }
 
-// ── LOGIN ──
-function renderLogin(){
-  return '<div class="lw"><div class="lb">'+
-    '<div style="display:flex;align-items:center;gap:12px;margin-bottom:28px">'+
-    '<div class="sb-mark">'+ic('egg',18,'#000')+'</div>'+
-    '<div><div style="font-family:var(--fh);font-size:22px;font-weight:800">HatcheryOS</div>'+
-    '<div style="font-size:9px;color:var(--t3);font-family:var(--fm);text-transform:uppercase;letter-spacing:.8px">CPF Malaysia · Upstream Management</div></div></div>'+
-    '<div id="loginErr" style="display:none" class="al are mb12"></div>'+
-    '<div class="fld mb12"><label>Email</label><input class="inp" id="loginEmail" type="email" placeholder="you@cpf.com" autocomplete="email"/></div>'+
-    '<div class="fld mb16"><label>Password</label><input class="inp" id="loginPw" type="password" placeholder="••••••••"/></div>'+
-    '<button class="btn bpri w100" style="justify-content:center;padding:11px" onclick="doLogin()">Sign In</button>'+
-    '<div style="text-align:center;margin-top:14px;font-size:11px;color:var(--t3)">Same account as DOC Tracker</div>'+
-    '</div></div>';
-}
+// ── Login ──
+function renderLogin(){return'<div class="lw"><div class="lb"><div style="display:flex;align-items:center;gap:12px;margin-bottom:26px"><div class="sb-mark">'+ic('egg',16,'#fff')+'</div><div><div style="font-size:20px;font-weight:700;letter-spacing:-.3px">HatcheryOS</div><div style="font-size:10px;color:var(--t3);font-family:var(--fm);text-transform:uppercase;letter-spacing:.6px;margin-top:2px">CPF Malaysia · Upstream</div></div></div><div id="loginErr" style="display:none" class="al are mb12"></div><div class="fld mb12"><label>Email</label><input class="inp" id="loginEmail" type="email" placeholder="you@cpf.com" autocomplete="email"/></div><div class="fld mb16"><label>Password</label><input class="inp" id="loginPw" type="password" placeholder="••••••••"/></div><button class="btn bpri w100" style="justify-content:center;padding:10px" onclick="doLogin()">Sign In</button><div style="text-align:center;margin-top:12px;font-size:11px;color:var(--t3)">Same account as DOC Tracker</div></div></div>';}
 
-// ── NAV ──
-const NAV=[
-  {group:'Overview',items:[{id:'db',label:'Dashboard',icon:'home'}]},
-  {group:'Upstream',items:[{id:'supply',label:'Farm Supply Plan',icon:'farm'},{id:'dist',label:'HE Delivery',icon:'truck'},{id:'cool',label:'Cool Room Stock',icon:'temp'}]},
-  {group:'Incubation',items:[{id:'sched',label:'Setting Schedule',icon:'cal'},{id:'candle',label:'Candling Results',icon:'bulb'}]},
-  {group:'Planning',items:[{id:'fc',label:'DOC Forecast vs Demand',icon:'trend'},{id:'cap',label:'Hatchery Capacity',icon:'chart'}]},
-  {group:'Reference',items:[{id:'std',label:'Breed Standards',icon:'egg'},{id:'res',label:'Storage Research',icon:'lab'},{id:'rep',label:'Reports',icon:'doc'}]},
-];
-const PTITLES={db:'Dashboard',supply:'Farm Supply Planning',dist:'HE Egg Delivery',cool:'Cool Room Stock',sched:'Setting Schedule',candle:'Candling Results',fc:'DOC Forecast vs Sales Demand',cap:'Hatchery Capacity',std:'Breed Standards',res:'Storage Research',rep:'Reports'};
+// ── Nav ──
+const NAV=[{group:'Overview',items:[{id:'db',label:'Dashboard',icon:'home'}]},{group:'Upstream',items:[{id:'supply',label:'Farm Supply Plan',icon:'farm'},{id:'dist',label:'HE Delivery',icon:'truck'},{id:'cool',label:'Cool Room Stock',icon:'temp'}]},{group:'Incubation',items:[{id:'sched',label:'Setting Schedule',icon:'cal'},{id:'candle',label:'Candling',icon:'bulb'}]},{group:'Planning',items:[{id:'fc',label:'Forecast vs Demand',icon:'trend'},{id:'cap',label:'Hatchery Capacity',icon:'chart'}]},{group:'Reference',items:[{id:'std',label:'Breed Standards',icon:'egg'},{id:'res',label:'Storage Research',icon:'lab'},{id:'rep',label:'Reports',icon:'doc'}]}];
+const PT={db:'Dashboard',supply:'Farm Supply Planning',dist:'HE Egg Delivery',cool:'Cool Room Stock',sched:'Setting Schedule',candle:'Candling Results',fc:'DOC Forecast vs Sales Demand',cap:'Hatchery Capacity',std:'Breed Standards',res:'Storage Research',rep:'Reports'};
 
-function computeAlerts(){
-  const alerts=[];
-  state.lots.filter(l=>l.status==='cool_room').forEach(l=>{
-    const age=Math.max(dD(l.recv_date,td()),0);
-    if(age>=10) alerts.push({t:'r',m:l.lot_id+' ('+l.hatchery+'): '+age+'d — CRITICAL'});
-    else if(age>=7) alerts.push({t:'a',m:l.lot_id+' ('+l.hatchery+'): '+age+'d — decay accelerating'});
-    else if(l.wop>38&&age>=5) alerts.push({t:'a',m:l.lot_id+' WOP '+l.wop+' old flock + '+age+'d'});
-  });
-  state.settings.filter(s=>s.status!=='completed').forEach(s=>{
-    const d=dD(td(),s.hatch_date);
-    if(d>=0&&d<=2) alerts.push({t:'g',m:s.set_id+': hatching '+(d===0?'today':'in '+d+'d')+' at '+s.hatchery});
-  });
-  return alerts;
-}
+function computeAlerts(){const al=[];state.lots.filter(l=>l.status==='cool_room').forEach(l=>{const age=Math.max(dD(l.recv_date,td()),0);if(age>=10)al.push({t:'r',m:l.lot_id+' ('+l.hatchery+'): '+age+'d — CRITICAL storage'});else if(age>=7)al.push({t:'a',m:l.lot_id+' ('+l.hatchery+'): '+age+'d — decay accelerating'});else if(l.wop>38&&age>=5)al.push({t:'a',m:l.lot_id+' WOP '+l.wop+' old flock + '+age+'d storage'});});state.settings.filter(s=>s.status!=='completed').forEach(s=>{const d=dD(td(),s.hatch_date);if(d>=0&&d<=2)al.push({t:'g',m:s.set_id+': hatching '+(d===0?'today':'in '+d+'d')+' — '+s.hatchery});});return al;}
 
-// ── RENDER ENGINE ──
+// ── Render ──
 function render(){
-  const root=document.getElementById('root');
-  if(!state.user) return;
+  const root=document.getElementById('root');if(!state.user)return;
   const alerts=computeAlerts();
   const coolLots=state.lots.filter(l=>l.status==='cool_room');
   const totalStock=coolLots.reduce((s,l)=>s+(l.stock_remaining||0),0);
   const activeSett=state.settings.filter(s=>s.status!=='completed');
   const hatchingSoon=activeSett.filter(s=>{const d=dD(td(),s.hatch_date);return d>=0&&d<=3;}).length;
-
-  root.innerHTML=
-    '<div class="shell">'+
-    '<aside class="sb">'+
-    '<div class="sb-logo"><div class="sb-mark">'+ic('egg',16,'#000')+'</div><div class="sb-name">HatcheryOS</div><div class="sb-sub">Upstream Mgmt</div></div>'+
-    '<nav class="nav">'+NAV.map(g=>
-      '<div class="nav-group"><div class="nav-label">'+g.group+'</div>'+
-      g.items.map(it=>'<button class="ni'+(state.page===it.id?' act':'')+'" onclick="setPage(\''+it.id+'\')">'+ic(it.icon,14)+it.label+(it.id==='db'&&alerts.length>0?'<span class="ni-badge">'+alerts.length+'</span>':'')+
-      '</button>').join('')+'</div>').join('')+
-    '</nav>'+
+  root.innerHTML='<div class="shell"><aside class="sb">'+
+    '<div class="sb-logo"><div class="sb-mark">'+ic('egg',14,'#fff')+'</div><div class="sb-name">HatcheryOS</div><div class="sb-sub">Upstream Mgmt</div></div>'+
+    '<nav class="nav">'+NAV.map(g=>'<div class="nav-group"><div class="nav-label">'+g.group+'</div>'+g.items.map(it=>'<button class="ni'+(state.page===it.id?' act':'')+'" onclick="setPage(\''+it.id+'\')">'+ic(it.icon,13)+it.label+(it.id==='db'&&alerts.length>0?'<span class="ni-badge">'+alerts.length+'</span>':'')+' </button>').join('')+'</div>').join('')+'</nav>'+
     '<div class="sb-foot"><div class="sb-stat">'+FARMS.length+' Farms · '+HN.length+' Hatcheries<br>Stock: <b class="tg">'+fN(totalStock)+' HE</b><br>Hatching: <b class="ta">'+hatchingSoon+' batches</b></div>'+
-    '<div class="ubar"><div class="av" style="background:rgba(0,212,170,.15);color:var(--gr)">'+((state.user.email||'?')[0].toUpperCase())+'</div>'+
-    '<div style="flex:1;min-width:0;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(state.user.email)+'</div>'+
-    '<button class="btn bsec bsm" onclick="doLogout()" title="Sign out">'+ic('out',12)+'</button></div></div>'+
-    '</aside>'+
-    '<main class="main">'+
-    '<div class="topbar"><div><div class="tbtitle">'+(PTITLES[state.page]||state.page)+'</div><div class="tbsub">'+new Date().toLocaleDateString('en-GB',{weekday:'long',day:'2-digit',month:'long',year:'numeric'})+'</div></div>'+
-    '<div style="display:flex;align-items:center;gap:8px;margin-left:auto"><span class="chip cg"><span class="dot"></span>Live</span><span class="chip cb">WOP-Adjusted</span><span class="chip ca">Storage Decay</span>'+
-    '<button class="btn bsec bsm" onclick="refreshAll()" title="Refresh">'+ic('refresh',12)+'</button></div></div>'+
+    '<div class="ubar"><div class="av" style="background:var(--grl);color:var(--gr)">'+((state.user.email||'?')[0].toUpperCase())+'</div><div style="flex:1;min-width:0;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--t2)">'+esc(state.user.email)+'</div><button class="btn bsec bsm" onclick="doLogout()">'+ic('out',11)+'</button></div></div>'+
+    '</aside><main class="main">'+
+    '<div class="topbar"><div><div class="tbtitle">'+(PT[state.page]||state.page)+'</div><div class="tbsub">'+new Date().toLocaleDateString('en-GB',{weekday:'long',day:'2-digit',month:'long',year:'numeric'})+'</div></div>'+
+    '<div style="display:flex;align-items:center;gap:8px;margin-left:auto"><span class="chip cg"><span class="dot"></span>Live</span><span class="chip cb">WOP-Adj</span><span class="chip ca">Decay Model</span><button class="btn bsec bsm" onclick="refreshAll()">'+ic('refresh',11)+'</button></div></div>'+
     '<div class="pg">'+(state.loading?'<div class="loading"><div class="spinner"></div>Loading data…</div>':renderPage(state.page,alerts))+'</div>'+
     '</main></div>';
 }
 
 function setPage(p){setState({page:p});}
-async function refreshAll(){setState({loading:true});await loadAll();setState({loading:false});toast('Refreshed');}
+async function refreshAll(){setState({loading:true});await loadAll();setState({loading:false});toast('Data refreshed');}
+function sBdg(s){const m={cool_room:'dm Cool Room',incubating:'db Incubating',candling:'da Candling',transfer:'dp Transfer',completed:'dg Done'};const p=(m[s]||'dm '+s).split(' ');return'<span class="bdg '+p[0]+'">'+p.slice(1).join(' ')+'</span>';}
+function aBdg(d,w){return'<span class="bdg '+(d>10?'dr':d>7||(w>38&&d>5)?'da':'dg')+'">'+d+'d'+(w>38&&d>5?' ⚠':'')+'</span>';}
 
-// ── STATUS / AGE BADGES ──
-function sBdg(s){const m={cool_room:'dm Cool Room',incubating:'db Incubating',candling:'da Candling',transfer:'dp Transfer',completed:'dg Done'};const p=(m[s]||'dm '+s).split(' ');return '<span class="bdg '+p[0]+'">'+p.slice(1).join(' ')+'</span>';}
-function aBdg(d,w){const cls=d>10?'dr':d>7||(w>38&&d>5)?'da':'dg';return '<span class="bdg '+cls+'">'+d+'d'+(w>38&&d>5?' F':'')+'</span>';}
+function renderPage(p,a){switch(p){case'db':return pgDashboard(a);case'supply':return pgSupply();case'dist':return pgDist();case'cool':return pgCool();case'sched':return pgSched();case'candle':return pgCandle();case'fc':return pgForecast();case'cap':return pgCapacity();case'std':return pgStandards();case'res':return pgResearch();case'rep':return pgReports();default:return'<div class="al abl">Page not found</div>';}}
 
-function renderPage(page,alerts){
-  switch(page){
-    case 'db':     return pgDashboard(alerts);
-    case 'supply': return pgSupply();
-    case 'dist':   return pgDist();
-    case 'cool':   return pgCool();
-    case 'sched':  return pgSched();
-    case 'candle': return pgCandle();
-    case 'fc':     return pgForecast();
-    case 'cap':    return pgCapacity();
-    case 'std':    return pgStandards();
-    case 'res':    return pgResearch();
-    case 'rep':    return pgReports();
-    default:       return '<div class="al abl">Page not found</div>';
-  }
-}
-
-// ── FILTER BAR helper ──
-function filterBar(fields){
-  return '<div class="fbar">'+fields.map(f=>{
-    if(f.type==='select') return '<select onchange="setState({'+f.key+':this.value})"><option value="">'+f.label+'</option>'+f.opts.map(o=>'<option value="'+o+'"'+(state[f.key]===o?' selected':'')+'>'+o+'</option>').join('')+'</select>';
-    if(f.type==='text') return '<input type="search" placeholder="'+f.label+'" value="'+(state[f.key]||'')+'" oninput="setState({'+f.key+':this.value})"/>';
-    return '';
-  }).join('')+'</div>';
-}
+function filterBar(fields){return'<div class="fbar">'+fields.map(f=>f.type==='select'?'<select onchange="setState({'+f.key+':this.value})"><option value="">'+f.label+'</option>'+f.opts.map(o=>'<option value="'+o+'"'+(state[f.key]===o?' selected':'')+'>'+o+'</option>').join('')+'</select>':'<input type="search" placeholder="'+f.label+'" value="'+(state[f.key]||'')+'" oninput="setState({'+f.key+':this.value})"/>').join('')+'</div>';}
 
 // ══════════════════════════════════════════
 // DASHBOARD
 // ══════════════════════════════════════════
 function pgDashboard(alerts){
-  const coolLots=state.lots.filter(l=>l.status==='cool_room');
-  const totalStock=coolLots.reduce((s,l)=>s+(l.stock_remaining||0),0);
-  const activeSett=state.settings.filter(s=>s.status!=='completed');
-  const inSet=activeSett.reduce((s,r)=>s+(r.set_qty||0),0);
-  const histDone=state.settings.filter(s=>s.status==='completed'&&s.actual_hatch_pct);
-  const avgA=histDone.length?(histDone.reduce((s,r)=>s+(r.actual_hatch_pct||0),0)/histDone.length).toFixed(1):0;
-  const expDoc=activeSett.reduce((s,r)=>s+(r.forecast_doc||0),0);
-
-  // demand this week from doc_targets
+  const cl=state.lots.filter(l=>l.status==='cool_room');
+  const ts=cl.reduce((s,l)=>s+(l.stock_remaining||0),0);
+  const as=state.settings.filter(s=>s.status!=='completed');
+  const ed=as.reduce((s,r)=>s+(r.forecast_doc||0),0);
   const curWk=isoWeek(td());
-  const wkDemand=state.docTargets.filter(t=>t.target_week===curWk).reduce((s,t)=>s+(t.booking||0),0);
-
-  const kpis=[
-    {l:'Cool Room Stock',v:fN(totalStock),s:'HE in storage',c:'var(--gr)',p:Math.min(totalStock/TOTAL_CAP*100,100)},
-    {l:'In Incubation',v:fN(inSet),s:'eggs setting',c:'var(--am)',p:Math.min(inSet/TOTAL_CAP*100,100)},
-    {l:'Expected DOC',v:fN(expDoc),s:'from active settings',c:'var(--pu)',p:60},
-    {l:'Sales Demand W'+curWk,v:fN(wkDemand)||'—',s:'from DOC Tracker targets',c:'var(--bl)',p:Math.min(wkDemand/TOTAL_CAP*100,100)},
-  ];
-
-  return '<div class="gr4 mb16">'+kpis.map(k=>'<div class="card kpi"><div class="kl">'+k.l+'</div><div class="kv" style="color:'+k.c+'">'+k.v+'</div><div class="ks">'+k.s+'</div><div class="kbar"><div class="kbf" style="width:'+k.p+'%;background:'+k.c+'"></div></div></div>').join('')+'</div>'+
+  const wd=state.docTargets.filter(t=>t.target_week===curWk).reduce((s,t)=>s+(t.booking||0),0);
+  const kpis=[{l:'Cool Room Stock',v:fN(ts),s:'HE in storage',c:'var(--gr)',p:Math.min(ts/TOTAL_CAP*100,100)},{l:'In Incubation',v:fN(as.reduce((s,r)=>s+(r.set_qty||0),0)),s:'eggs setting',c:'var(--am)',p:60},{l:'Expected DOC',v:fN(ed),s:'from active settings',c:'var(--pu)',p:60},{l:'Sales Demand W'+curWk,v:wd?fN(wd):'—',s:'from DOC Tracker',c:'var(--bl)',p:Math.min(wd/TOTAL_CAP*100,100)}];
+  return'<div class="gr4 mb16">'+kpis.map(k=>'<div class="card kpi"><div class="kl">'+k.l+'</div><div class="kv" style="color:'+k.c+'">'+k.v+'</div><div class="ks">'+k.s+'</div><div class="kbar"><div class="kbf" style="width:'+k.p+'%;background:'+k.c+'"></div></div></div>').join('')+'</div>'+
     (alerts.length?'<div class="mb16">'+alerts.map(a=>'<div class="al '+(a.t==='r'?'are':a.t==='a'?'aw':'agr')+' mb8">'+ic(a.t==='r'?'alert':'info',12)+' '+esc(a.m)+'</div>').join('')+'</div>':'')+
-    '<div class="gr2 mb16">'+
-    '<div class="card"><div class="ct">Active Settings</div><div class="ovx"><table><thead><tr><th>ID</th><th>Hatchery</th><th>Breed</th><th>WOP</th><th>Adj%</th><th>Forecast DOC</th><th>Hatch Date</th><th>Status</th></tr></thead><tbody>'+
-    (activeSett.length?activeSett.slice(0,8).map(s=>{const ad=s.adj_hatchability||aH(s.breed,s.wop,s.storage_days);return '<tr><td class="mn tg">'+esc(s.set_id)+'</td><td style="font-size:11px">'+esc(s.hatchery)+'</td><td><span class="'+BC[bI(s.breed)]+'">'+esc(s.breed.split(' ')[0])+'</span></td><td class="mn">'+s.wop+'w</td><td class="mn" style="color:'+(ad>=(gS(s.breed,s.wop)-1)?'var(--gr)':'var(--am)')+'">'+ad+'%</td><td class="mn tg">'+fN(s.forecast_doc)+'</td><td class="mn ta">'+fS(s.hatch_date)+'</td><td>'+sBdg(s.status)+'</td></tr>';}).join(''):'<tr><td colspan="8" style="text-align:center;color:var(--t3);padding:24px">No active settings</td></tr>')+
+    '<div class="gr2"><div class="card"><div class="ct">Active Settings</div><div class="ovx"><table><thead><tr><th>ID</th><th>Hatchery</th><th>Breed</th><th>WOP</th><th>Adj%</th><th>Exp DOC</th><th>Hatch Date</th><th>Status</th></tr></thead><tbody>'+
+    (as.length?as.slice(0,8).map(s=>{const ad=s.adj_hatchability||aH(s.breed,s.wop,s.storage_days);return'<tr><td class="mn tg">'+esc(s.set_id)+'</td><td>'+esc(s.hatchery)+'</td><td><span class="'+BC[bI(s.breed)]+'">'+s.breed.split(' ')[0]+'</span></td><td class="mn">'+s.wop+'w</td><td class="mn tg">'+ad+'%</td><td class="mn tg">'+fN(s.forecast_doc)+'</td><td class="mn ta">'+fS(s.hatch_date)+'</td><td>'+sBdg(s.status)+'</td></tr>';}).join(''):'<tr><td colspan="8" style="text-align:center;color:var(--t3);padding:20px">No active settings</td></tr>')+
     '</tbody></table></div></div>'+
-    '<div class="card"><div class="ct">Cool Room by Hatchery</div>'+
-    HATCH.map(hh=>{const hl=coolLots.filter(l=>l.hatchery===hh.name);const qty=hl.reduce((s,l)=>s+(l.stock_remaining||0),0);const inUse=activeSett.filter(s=>s.hatchery===hh.name).reduce((a,r)=>a+(r.set_qty||0),0);const util=hh.wc>0?inUse/hh.wc:0;return '<div class="prog-card mb8"><div class="prog-header"><div><div style="font-size:12px;font-weight:600">'+hh.name+'</div><div class="mn" style="font-size:9px;color:var(--t3)">Cap: '+fN(hh.wc)+'/wk</div></div><div style="text-align:right"><div style="font-size:16px;font-family:var(--fh);font-weight:800;color:var(--gr)">'+fN(qty)+'</div><div style="font-size:9px;color:var(--t3)">'+hl.length+' lots</div></div></div><div style="font-size:9px;color:var(--t3);margin-bottom:3px">Util: <span style="color:'+cC(util)+'">'+Math.round(util*100)+'% '+cL(util)+'</span></div><div class="pbar"><div class="pbf" style="width:'+Math.min(util*100,100)+'%;background:'+cC(util)+'"></div></div></div>';}).join('')+
-    '</div></div>';
+    '<div class="card"><div class="ct">Cool Room by Hatchery</div>'+HATCH.map(hh=>{const hl=cl.filter(l=>l.hatchery===hh.name);const qty=hl.reduce((s,l)=>s+(l.stock_remaining||0),0);const inUse=as.filter(s=>s.hatchery===hh.name).reduce((a,r)=>a+(r.set_qty||0),0);const util=hh.wc>0?inUse/hh.wc:0;return'<div class="prog-card mb8"><div class="prog-header"><div><div style="font-size:13px;font-weight:600">'+hh.name+'</div><div style="font-size:10px;color:var(--t3);font-family:var(--fm)">Cap '+fN(hh.wc)+'/wk</div></div><div style="text-align:right"><div style="font-size:18px;font-weight:700;color:var(--gr)">'+fN(qty)+'</div><div style="font-size:10px;color:var(--t3)">'+hl.length+' lots</div></div></div><div style="font-size:11px;color:var(--t3);margin-bottom:4px">Utilisation: <span style="color:'+cC(util)+'">'+Math.round(util*100)+'% — '+cL(util)+'</span></div><div class="pbar"><div class="pbf" style="width:'+Math.min(util*100,100)+'%;background:'+cC(util)+'"></div></div></div>';}).join('')+'</div></div>';
 }
 
 // ══════════════════════════════════════════
-// FARM SUPPLY PLAN
+// FARM SUPPLY PLAN — current week default, sticky button
 // ══════════════════════════════════════════
-function renderCurrentWeekFarms(plans,wk){
-  const p=plans.find(x=>x.week_no===wk);
-  if(!p) return '<div style="color:var(--t3);font-size:12px">No data for W'+wk+' — click Add/Edit Week</div>';
-  const maxVal=(p.total_farm_he||1)/FARMS.length*2;
-  return FARMS.map((f,i)=>'<div class="supply-grid"><div style="font-size:11px">'+f+'</div><div class="supply-bar"><div class="supply-fill" style="width:'+Math.min((p[FARM_KEYS[i]]||0)/maxVal*100,100)+'%;background:var(--gr)"></div></div><div class="mn tg">'+fN(p[FARM_KEYS[i]]||0)+'</div></div>').join('')+
-    '<div class="sep"></div><div class="row-val"><span style="font-size:11px">Total Farm HE</span><b class="mn tg">'+fN(p.total_farm_he||0)+'</b></div>'+
-    (p.plan_buy_he?'<div class="row-val"><span style="font-size:11px">Planned Buy</span><span class="mn ta">'+fN(p.plan_buy_he)+'</span></div>':'')+
-    (p.actual_buy_he?'<div class="row-val"><span style="font-size:11px">Actual Buy</span><span class="mn tb">'+fN(p.actual_buy_he)+'</span></div>':'');
-}
-
 function pgSupply(){
   const plans=state.farmPlans;
   const curWk=isoWeek(td());
-
-  // build demand by week from doc_targets
   const demandByWk={};
-  state.docTargets.forEach(t=>{
-    const wk=t.target_week;if(!wk)return;
-    demandByWk[wk]=(demandByWk[wk]||0)+(t.booking||0);
-  });
+  state.docTargets.forEach(t=>{if(t.target_week)demandByWk[t.target_week]=(demandByWk[t.target_week]||0)+(t.booking||0);});
 
-  return '<div>'+
-    '<div class="fl aic jb mb16">'+
-    '<div class="al abl" style="flex:1;margin-right:12px">'+ic('info',12)+' Egg set this week → DOC hatch week <b>+3</b>. <span class="tg">Green</span> = surplus, <span class="tr2">Red</span> = shortfall. Demand pulled from DOC Tracker sales targets.</div>'+
-    '<button class="btn bpri" onclick="openFarmPlanModal()">'+ic('plus',12)+' Add/Edit Week</button></div>'+
-    (plans.length===0?'<div class="card" style="text-align:center;padding:48px;color:var(--t3)"><div style="margin-top:12px">No farm plan data — import from Excel or add manually</div><button class="btn bsec" style="margin-top:16px" onclick="openFarmPlanModal()">'+ic('plus',12)+' Add First Week</button></div>':
-    '<div class="card mb16"><div class="ct">Weekly Egg Supply vs Hatchery Demand</div><div class="ovx"><table><thead><tr>'+
-    thSort('sortLots','week_no','Wk')+'<th>Week End</th>'+
-    FARMS.map(f=>'<th>'+f+'</th>').join('')+
-    '<th>Total Farm HE</th><th>Plan Buy</th><th>Actual Buy</th><th>Total Avail</th><th>Sales Demand (W+3)</th><th>Gap</th></tr></thead><tbody>'+
-    sortData(plans,'week_no',1).map(p=>{
-      const total=(p.total_farm_he||0)+(p.actual_buy_he||0);
-      const demandWk=p.week_no+3;
-      const demand=demandByWk[demandWk]||0;
-      const gap=total-demand;
-      const isCur=p.week_no===curWk;
-      return '<tr style="'+(isCur?'background:rgba(0,212,170,.04)':'')+'">'+
-        '<td class="mn'+(isCur?' tg':'')+'"><b>'+(isCur?'▶ ':'')+'W'+p.week_no+'</b></td>'+
-        '<td class="mn">'+fS(p.week_end_date)+'</td>'+
-        FARM_KEYS.map(k=>'<td class="mn tr">'+fN(p[k]||0)+'</td>').join('')+
-        '<td class="mn tr" style="font-weight:600">'+fN(p.total_farm_he||0)+'</td>'+
-        '<td class="mn tr" style="color:var(--am)">'+(p.plan_buy_he?fN(p.plan_buy_he):'—')+'</td>'+
-        '<td class="mn tr" style="color:var(--bl)">'+(p.actual_buy_he?fN(p.actual_buy_he):'—')+'</td>'+
-        '<td class="mn tr" style="font-weight:600">'+fN(total)+'</td>'+
-        '<td class="mn tr" style="color:var(--t3)">'+(demand?fN(demand):'—')+'</td>'+
-        '<td class="mn tr"><span class="'+(demand?(gap<0?'gap-neg':gap>0?'gap-pos':'gap-neu'):'gap-neu')+'">'+(demand?(gap>=0?'+':'')+fN(gap):'—')+'</span></td>'+
-        '</tr>';}).join('')+
-    '</tbody></table></div></div>')+
-    '<div class="gr3">'+
-    '<div class="card"><div class="ct">Farm Production W'+curWk+'</div>'+renderCurrentWeekFarms(plans,curWk)+'</div>'+
-    '<div class="card"><div class="ct">Hatchery Weekly Capacity</div>'+
-    HATCH.map(h=>'<div class="supply-grid"><div style="font-size:11px">'+h.name+'</div><div class="supply-bar"><div class="supply-fill" style="width:'+Math.round(h.wc/TOTAL_CAP*100)+'%;background:var(--bl)"></div></div><div class="mn tb">'+fN(h.wc)+'</div></div>').join('')+
-    '<div class="sep"></div><div class="row-val"><span style="font-size:11px">Total Capacity</span><b class="mn tg">'+fN(TOTAL_CAP)+'</b></div></div>'+
-    '<div class="card"><div class="ct">Supply Health (last 8 wk)</div>'+
-    plans.slice(-8).reverse().map(p=>{const total=(p.total_farm_he||0)+(p.actual_buy_he||0);const demand=demandByWk[p.week_no+3]||TOTAL_CAP*.65;const ratio=demand>0?total/demand:1;return '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><div class="mn" style="width:30px;color:var(--t3)">W'+p.week_no+'</div><div style="flex:1"><div class="supply-bar"><div class="supply-fill" style="width:'+Math.min(ratio*100,100)+'%;background:'+(ratio>=1?'var(--gr)':ratio>=.85?'var(--am)':'var(--re)')+'"></div></div></div><div class="mn" style="width:40px;text-align:right;color:'+(ratio>=1?'var(--gr)':ratio>=.85?'var(--am)':'var(--re)')+'">'+Math.round(ratio*100)+'%</div></div>';}).join('')+
-    '</div></div></div>';
+  const tableRows=sortData(plans,'week_no',1).map(p=>{
+    const total=(p.total_farm_he||0)+(p.actual_buy_he||0);
+    const demand=demandByWk[p.week_no+3]||0;
+    const gap=total-demand;
+    const isCur=p.week_no===curWk;
+    return'<tr id="sup-w'+p.week_no+'" style="'+(isCur?'background:rgba(63,185,80,.04);outline:1px solid rgba(63,185,80,.15)':'')+'" onclick="openFarmPlanModal(\''+p.id+'\')">'+
+      '<td class="mn'+(isCur?' tg font-bold':'')+'" style="'+(isCur?'font-weight:700':'')+'"><b>'+(isCur?'▶ ':'')+'W'+p.week_no+'</b></td>'+
+      '<td class="mn">'+fS(p.week_end_date)+'</td>'+
+      FARM_KEYS.map(k=>'<td class="mn ta-r">'+fN(p[k]||0)+'</td>').join('')+
+      '<td class="mn ta-r" style="font-weight:600">'+fN(p.total_farm_he||0)+'</td>'+
+      '<td class="mn ta-r" style="color:var(--am)">'+(p.plan_buy_he?fN(p.plan_buy_he):'—')+'</td>'+
+      '<td class="mn ta-r" style="color:var(--bl)">'+(p.actual_buy_he?fN(p.actual_buy_he):'—')+'</td>'+
+      '<td class="mn ta-r" style="font-weight:600">'+fN(total)+'</td>'+
+      '<td class="mn ta-r" style="color:var(--t3)">'+(demand?fN(demand):'—')+'</td>'+
+      '<td class="mn ta-r"><span class="'+(demand?(gap<0?'gap-neg':gap>0?'gap-pos':'gap-neu'):'gap-neu')+'">'+(demand?(gap>=0?'+':'')+fN(gap):'—')+'</span></td>'+
+      '<td><button class="btn bsec bsm" onclick="event.stopPropagation();openFarmPlanModal(\''+p.id+'\')">Edit</button></td>'+
+      '</tr>';}).join('');
+
+  return'<div>'+
+    // sticky action bar
+    '<div class="supply-sticky">'+
+    '<div class="al abl" style="flex:1;margin:0;font-size:11.5px">'+ic('info',11)+' Egg set W<b>N</b> → DOC hatch W<b>N+3</b>. Click any row to edit. <span class="tg">+Gap</span> = surplus, <span class="tr2">−Gap</span> = shortfall → needs external buy.</div>'+
+    '<button class="btn bpri" onclick="openFarmPlanModal()">'+ic('plus',12)+' Add Week</button>'+
+    '<button class="btn bsec bsm" onclick="scrollToCurrentWeek()" title="Jump to current week">▶ W'+curWk+'</button>'+
+    '</div>'+
+    (plans.length===0?
+      '<div style="padding:20px"><div class="card" style="text-align:center;padding:40px;color:var(--t3)"><div>No farm plan data yet</div><button class="btn bpri bsm" style="margin-top:12px" onclick="openFarmPlanModal()">'+ic('plus',11)+' Add First Week</button></div></div>':
+      '<div style="padding:20px"><div class="card"><div class="ovx"><table><thead><tr>'+
+      thS('sortLots','week_no','Wk')+'<th>Week End</th>'+FARMS.map(f=>'<th>'+f+'</th>').join('')+
+      '<th>Total Farm</th><th>Plan Buy</th><th>Actual Buy</th><th>Total Avail</th><th>Demand (W+3)</th><th>Gap</th><th></th></tr></thead>'+
+      '<tbody>'+tableRows+'</tbody></table></div></div></div>')+
+    '</div>';
 }
 
 // ══════════════════════════════════════════
 // HE DELIVERY
 // ══════════════════════════════════════════
 function pgDist(){
-  const lots=sortData(state.lots,state.sortLots.col,state.sortLots.dir).filter(l=>{
-    if(state.fLotH && l.hatchery!==state.fLotH) return false;
-    if(state.fLotS && l.status!==state.fLotS) return false;
-    return true;
-  });
-  return '<div>'+
-    '<div class="fl aic jb mb16"><div class="al abl" style="flex:1;margin-right:12px">'+ic('info',12)+' Lots tagged with WOP & received date. Storage decay auto-calculated.</div><button class="btn bpri" onclick="openLotModal()">'+ic('plus',12)+' Record HE Delivery</button></div>'+
-    '<div class="gr4 mb16">'+HATCH.map(hh=>{const hl=state.lots.filter(l=>l.hatchery===hh.name&&l.status==='cool_room');return '<div class="card kpi"><div class="kl">'+hh.name+'</div><div class="kv tg">'+fN(hl.reduce((s,l)=>s+(l.stock_remaining||0),0))+'</div><div class="ks">'+hl.length+' lots in cool room</div></div>';}).join('')+'</div>'+
+  const lots=sortData(state.lots,state.sortLots.col,state.sortLots.dir).filter(l=>(!state.fLotH||l.hatchery===state.fLotH)&&(!state.fLotS||l.status===state.fLotS));
+  return'<div>'+
+    '<div class="fl aic jb mb12"><div></div><button class="btn bpri" onclick="openLotModal()">'+ic('plus',12)+' Record HE Delivery</button></div>'+
+    '<div class="gr4 mb12">'+HATCH.map(hh=>{const hl=state.lots.filter(l=>l.hatchery===hh.name&&l.status==='cool_room');return'<div class="card kpi"><div class="kl">'+hh.name+'</div><div class="kv tg">'+fN(hl.reduce((s,l)=>s+(l.stock_remaining||0),0))+'</div><div class="ks">'+hl.length+' lots in cool room</div></div>';}).join('')+'</div>'+
     filterBar([{type:'select',key:'fLotH',label:'All Hatcheries',opts:HN},{type:'select',key:'fLotS',label:'All Status',opts:['cool_room','incubating','candling','transfer','completed']}])+
     '<div class="card"><div class="ct">All HE Lots ('+lots.length+')</div><div class="ovx"><table><thead><tr>'+
-    thSort('sortLots','lot_id','Lot ID')+thSort('sortLots','farm','Farm')+thSort('sortLots','hatchery','Hatchery')+
-    '<th>Breed</th>'+thSort('sortLots','wop','WOP')+thSort('sortLots','recv_date','Recv')+
-    '<th>Age</th><th>Qty Recv</th><th>Stock</th><th>Std%</th><th>Decay</th><th>Adj%</th><th>Exp DOC</th><th>Status</th></tr></thead><tbody>'+
-    (lots.length?lots.map(l=>{const age=Math.max(dD(l.recv_date,td()),0),std=gS(l.breed,l.wop),dc2=dc(age,l.wop),ad=aH(l.breed,l.wop,age);return '<tr><td class="mn tg">'+esc(l.lot_id)+'</td><td style="font-size:11px">'+esc(l.farm)+'</td><td style="font-size:11px">'+esc(l.hatchery)+'</td><td><span class="'+BC[bI(l.breed)]+'">'+esc(l.breed)+'</span></td><td class="mn">'+l.wop+'w</td><td class="mn">'+fS(l.recv_date)+'</td><td>'+aBdg(age,l.wop)+'</td><td class="mn tr">'+fN(l.qty_received)+'</td><td class="mn tr">'+fN(l.stock_remaining)+'</td><td class="mn" style="color:var(--t3)">'+std+'%</td><td class="mn" style="color:'+(dc2>2?'var(--re)':dc2>0.5?'var(--am)':'var(--gr)')+'">-'+dc2+'%</td><td class="mn" style="color:'+(ad>=(std-1)?'var(--gr)':ad>=(std-3)?'var(--am)':'var(--re)')+'">'+ad+'%</td><td class="mn tr">'+(l.status==='cool_room'?fN(Math.round((l.stock_remaining||0)*ad/100)):'set')+'</td><td>'+sBdg(l.status)+'</td></tr>';}).join(''):'<tr><td colspan="14" style="text-align:center;color:var(--t3);padding:28px">No lots recorded yet</td></tr>')+
+    thS('sortLots','lot_id','Lot ID')+thS('sortLots','farm','Farm')+thS('sortLots','hatchery','Hatchery')+'<th>Breed</th>'+thS('sortLots','wop','WOP')+thS('sortLots','recv_date','Recv')+'<th>Age</th><th>Qty Recv</th><th>Stock</th><th>Std%</th><th>Decay</th><th>Adj%</th><th>Exp DOC</th><th>Status</th></tr></thead><tbody>'+
+    (lots.length?lots.map(l=>{const age=Math.max(dD(l.recv_date,td()),0),std=gS(l.breed,l.wop),dc2=dc(age,l.wop),ad=aH(l.breed,l.wop,age);return'<tr><td class="mn tg">'+esc(l.lot_id)+'</td><td>'+esc(l.farm)+'</td><td>'+esc(l.hatchery)+'</td><td><span class="'+BC[bI(l.breed)]+'">'+l.breed+'</span></td><td class="mn">'+l.wop+'w</td><td class="mn">'+fS(l.recv_date)+'</td><td>'+aBdg(age,l.wop)+'</td><td class="mn ta-r">'+fN(l.qty_received)+'</td><td class="mn ta-r">'+fN(l.stock_remaining)+'</td><td class="mn" style="color:var(--t3)">'+std+'%</td><td class="mn" style="color:'+(dc2>2?'var(--re)':dc2>.5?'var(--am)':'var(--gr)')+'">-'+dc2+'%</td><td class="mn" style="color:'+(ad>=(std-1)?'var(--gr)':ad>=(std-3)?'var(--am)':'var(--re)')+'">'+ad+'%</td><td class="mn ta-r">'+(l.status==='cool_room'?fN(Math.round((l.stock_remaining||0)*ad/100)):'set')+'</td><td>'+sBdg(l.status)+'</td></tr>';}).join(''):'<tr><td colspan="14" style="text-align:center;color:var(--t3);padding:24px">No lots recorded yet</td></tr>')+
     '</tbody></table></div></div></div>';
 }
 
 // ══════════════════════════════════════════
-// COOL ROOM
+// COOL ROOM — per hatchery panel with farm breakdown
 // ══════════════════════════════════════════
 function pgCool(){
-  const sl=sortData(state.lots.filter(l=>l.status==='cool_room'),state.sortCool.col,state.sortCool.dir).filter(l=>!state.fCoolH||l.hatchery===state.fCoolH);
-  // summary per hatchery
-  const summary=HATCH.map(hh=>{
-    const hl=sl.filter(l=>l.hatchery===hh.name);
-    const qty=hl.reduce((s,l)=>s+(l.stock_remaining||0),0);
-    const expDoc=hl.reduce((s,l)=>{const age=Math.max(dD(l.recv_date,td()),0);return s+Math.round((l.stock_remaining||0)*aH(l.breed,l.wop,age)/100);},0);
-    const aging=hl.filter(l=>Math.max(dD(l.recv_date,td()),0)>7).length;
-    return {name:hh.name,wc:hh.wc,qty,expDoc,aging,lots:hl.length};
+  const curWkStart=weekStart(td());
+  const prevWkStart=weekStart(aD(td(),-7));
+  const coolLots=state.lots.filter(l=>l.status==='cool_room');
+  const filtH=state.fCoolH;
+
+  // per hatchery panels
+  const panels=HATCH.filter(hh=>!filtH||hh.name===filtH).map(hh=>{
+    const hl=coolLots.filter(l=>l.hatchery===hh.name);
+    const totalStock=hl.reduce((s,l)=>s+(l.stock_remaining||0),0);
+    const totalExpDoc=hl.reduce((s,l)=>{const age=Math.max(dD(l.recv_date,td()),0);return s+Math.round((l.stock_remaining||0)*aH(l.breed,l.wop,age)/100);},0);
+    // categorise: last week stock vs this week received
+    const prevWkLots=hl.filter(l=>l.recv_date<curWkStart);
+    const thisWkLots=hl.filter(l=>l.recv_date>=curWkStart);
+    const prevStock=prevWkLots.reduce((s,l)=>s+(l.stock_remaining||0),0);
+    const thisIn=thisWkLots.reduce((s,l)=>s+(l.stock_remaining||0),0);
+    const inUse=state.settings.filter(s=>s.hatchery===hh.name&&s.status!=='completed').reduce((a,r)=>a+(r.set_qty||0),0);
+    const util=hh.wc>0?inUse/hh.wc:0;
+
+    // per-farm breakdown
+    const farmRows=FARMS.map(f=>{
+      const fl=hl.filter(l=>l.farm===f);
+      if(!fl.length)return null;
+      return fl.map(l=>{
+        const age=Math.max(dD(l.recv_date,td()),0);
+        const std=gS(l.breed,l.wop),dc2=dc(age,l.wop),ad=aH(l.breed,l.wop,age);
+        const isThisWk=l.recv_date>=curWkStart;
+        const isPrev=l.recv_date>=prevWkStart&&l.recv_date<curWkStart;
+        return'<div class="cr-farm-row">'+
+          '<div class="cr-cell" style="font-weight:500;color:var(--t)">'+f+'<span class="bdg '+(isThisWk?'dg':isPrev?'db':'dm')+'" style="margin-left:6px">'+(isThisWk?'This wk':isPrev?'Prev wk':'Older')+'</span></div>'+
+          '<div class="cr-cell"><span class="'+BC[bI(l.breed)]+'">'+l.breed.split(' ')[0]+'</span></div>'+
+          '<div class="cr-cell mn">WOP '+l.wop+'w</div>'+
+          '<div class="cr-cell">'+aBdg(age,l.wop)+'</div>'+
+          '<div class="cr-cell mn ta-r" style="font-weight:600">'+fN(l.stock_remaining)+'</div>'+
+          '<div class="cr-cell" style="gap:12px;flex-wrap:wrap">'+
+            '<span style="font-size:11px;color:var(--t3)">Std '+std+'%</span>'+
+            '<span style="color:'+(dc2>2?'var(--re)':dc2>.5?'var(--am)':'var(--gr)')+'">-'+dc2+'%</span>'+
+            '<span style="color:'+(ad>=(std-1)?'var(--gr)':ad>=(std-3)?'var(--am)':'var(--re)')+';font-weight:600">Adj '+ad+'%</span>'+
+            '<span class="tg" style="font-weight:600">→ '+fN(Math.round((l.stock_remaining||0)*ad/100))+' DOC</span>'+
+            '<button class="btn bpri bsm" onclick="openSetModal(\''+l.id+'\')">Set</button>'+
+          '</div>'+
+          '</div>';
+      }).join('');
+    }).filter(Boolean);
+
+    return'<div class="cr-panel mb16">'+
+      '<div class="cr-panel-head">'+
+        '<div style="display:flex;align-items:center;gap:16px">'+
+          '<div style="font-size:15px;font-weight:700">'+hh.name+'</div>'+
+          '<div style="display:flex;gap:10px;align-items:center">'+
+            '<div><div style="font-size:10px;color:var(--t3);font-weight:600">PREV WK STOCK</div><div style="font-size:16px;font-weight:700;color:var(--bl)">'+fN(prevStock)+'</div></div>'+
+            '<div style="color:var(--t3)">+</div>'+
+            '<div><div style="font-size:10px;color:var(--t3);font-weight:600">THIS WK IN</div><div style="font-size:16px;font-weight:700;color:var(--gr)">'+fN(thisIn)+'</div></div>'+
+            '<div style="color:var(--t3)">=</div>'+
+            '<div><div style="font-size:10px;color:var(--t3);font-weight:600">TOTAL STOCK</div><div style="font-size:16px;font-weight:700;color:var(--t)">'+fN(totalStock)+'</div></div>'+
+          '</div>'+
+        '</div>'+
+        '<div style="display:flex;align-items:center;gap:16px">'+
+          '<div style="text-align:right"><div style="font-size:10px;color:var(--t3);font-weight:600">EXP DOC</div><div style="font-size:16px;font-weight:700;color:var(--pu)">'+fN(totalExpDoc)+'</div></div>'+
+          '<div style="text-align:right"><div style="font-size:10px;color:var(--t3);font-weight:600">CAPACITY UTIL</div><div style="font-size:14px;font-weight:700;color:'+cC(util)+'">'+Math.round(util*100)+'%</div></div>'+
+          '<div class="pbar" style="width:80px;height:6px"><div class="pbf" style="width:'+Math.min(util*100,100)+'%;background:'+cC(util)+'"></div></div>'+
+        '</div>'+
+      '</div>'+
+      (farmRows.length?
+        '<div class="cr-head-row"><div class="cr-hcell">Farm</div><div class="cr-hcell">Breed</div><div class="cr-hcell">WOP</div><div class="cr-hcell">Age</div><div class="cr-hcell">Stock (HE)</div><div class="cr-hcell">Quality & Action</div></div>'+
+        farmRows.join(''):
+        '<div style="padding:20px;text-align:center;color:var(--t3);font-size:12px">No lots in cool room for this hatchery</div>')+
+      '</div>';
   });
 
-  return '<div>'+
-    '<div class="gr4 mb16">'+summary.map(hh=>'<div class="card kpi"><div class="kl">'+hh.name+'</div><div class="kv tg">'+fN(hh.qty)+'</div><div class="ks">'+hh.lots+' lots · Exp DOC: <b class="tg">'+fN(hh.expDoc)+'</b></div>'+(hh.aging>0?'<div class="mt4"><span class="bdg da">'+hh.aging+' aging &gt;7d</span></div>':'')+' </div>').join('')+'</div>'+
+  return'<div>'+
     filterBar([{type:'select',key:'fCoolH',label:'All Hatcheries',opts:HN}])+
-    '<div class="card"><div class="ct">Cool Room Inventory — Click Set to initiate incubation</div><div class="ovx"><table><thead><tr>'+
-    thSort('sortCool','lot_id','Lot ID')+thSort('sortCool','hatchery','Hatchery')+thSort('sortCool','farm','Farm')+
-    '<th>Breed</th>'+thSort('sortCool','wop','WOP')+thSort('sortCool','recv_date','Recv')+
-    '<th>Age</th><th>Stock</th><th>Std%</th><th>Decay</th><th>Adj%</th><th>Exp DOC</th><th>Action</th></tr></thead><tbody>'+
-    (sl.length?sl.map(l=>{const age=Math.max(dD(l.recv_date,td()),0),std=gS(l.breed,l.wop),dc2=dc(age,l.wop),ad=aH(l.breed,l.wop,age);return '<tr><td class="mn tg">'+esc(l.lot_id)+'</td><td style="font-size:11px">'+esc(l.hatchery)+'</td><td style="font-size:11px;color:var(--t2)">'+esc(l.farm)+'</td><td><span class="'+BC[bI(l.breed)]+'">'+esc(l.breed)+'</span></td><td class="mn">'+l.wop+'w</td><td class="mn">'+fS(l.recv_date)+'</td><td>'+aBdg(age,l.wop)+'</td><td class="mn tr">'+fN(l.stock_remaining)+'</td><td class="mn" style="color:var(--t3)">'+std+'%</td><td class="mn" style="color:'+(dc2>2?'var(--re)':dc2>0.5?'var(--am)':'var(--gr)')+'">-'+dc2+'%</td><td class="mn" style="color:'+(ad>=(std-1)?'var(--gr)':ad>=(std-3)?'var(--am)':'var(--re)')+'">'+ad+'%</td><td class="mn tr tg">'+fN(Math.round((l.stock_remaining||0)*ad/100))+'</td><td><button class="btn bpri bsm" onclick="openSetModal(\''+l.id+'\')">'+ic('plus',11)+' Set</button></td></tr>';}).join(''):'<tr><td colspan="13" style="text-align:center;color:var(--t3);padding:28px">Cool room is empty</td></tr>')+
-    '</tbody></table></div></div></div>';
+    panels.join('')+
+    '</div>';
 }
 
 // ══════════════════════════════════════════
 // SETTING SCHEDULE
 // ══════════════════════════════════════════
 function pgSched(){
-  const filterH=state.fSchedH, filterS=state.fSchedS;
-  const active=sortData(state.settings.filter(s=>s.status!=='completed'),state.sortSett.col,state.sortSett.dir).filter(s=>{
-    if(filterH && s.hatchery!==filterH) return false;
-    if(filterS && s.status!==filterS) return false;
-    return true;
-  });
+  const active=sortData(state.settings.filter(s=>s.status!=='completed'),state.sortSett.col,state.sortSett.dir).filter(s=>(!state.fSchedH||s.hatchery===state.fSchedH)&&(!state.fSchedS||s.status===state.fSchedS));
   const steps=[{l:'Setting',d:0},{l:'Day 7',d:7},{l:'Candle',d:18},{l:'Hatcher',d:18},{l:'Hatch',d:21}];
-
-  return '<div>'+
-    filterBar([{type:'select',key:'fSchedH',label:'All Hatcheries',opts:HN},{type:'select',key:'fSchedS',label:'All Status',opts:['incubating','candling','transfer']}])+
-    (active.length===0?'<div class="al abl mb16">'+ic('info',12)+' No active settings match filter. Initiate from Cool Room.</div>':'')+
-    active.map(s=>{
-      const day=Math.min(Math.max(dD(s.set_date,td()),0),21);
-      const ad=s.adj_hatchability||aH(s.breed,s.wop,s.storage_days);
-      return '<div class="card mb12"><div class="fl aic jb mb12"><div class="fl aic" style="gap:10px"><span class="mn tg">'+esc(s.set_id)+'</span><span style="font-size:12px">'+esc(s.hatchery)+'</span><span class="'+BC[bI(s.breed)]+'">'+esc(s.breed)+'</span><span class="mn" style="color:var(--t3)">WOP '+s.wop+'</span>'+aBdg(s.storage_days,s.wop)+'</div>'+
-        '<div class="fl aic" style="gap:8px">'+sBdg(s.status)+
-        (s.status==='incubating'&&day>=17?'<button class="btn bsec bsm" onclick="advSetting(\''+s.id+'\',\'candling\')">Candle</button>':'')+
-        (s.status==='candling'?'<button class="btn bsec bsm" onclick="advSetting(\''+s.id+'\',\'transfer\')">Transfer</button>':'')+
-        (s.status==='transfer'?'<button class="btn bpri bsm" onclick="openCompleteModal(\''+s.id+'\')">Complete Hatch</button>':'')+
-        '</div></div>'+
-        '<div class="tline mb12">'+steps.map((st,i)=>{const dn=day>=st.d&&i<steps.length-1,ac=!dn&&Math.abs(day-st.d)<=1;return '<div class="tls '+(dn?'done':ac?'curr':'fut')+'"><div class="tld">'+(dn?'✓':st.d)+'</div><div class="tll">'+st.l+'</div></div>';}).join('')+'</div>'+
-        '<div class="gr4">'+[{l:'Set Date',v:fS(s.set_date)},{l:'Hatch Date',v:fS(s.hatch_date),c:'var(--am)'},{l:'Adj Hatch%',v:ad+'%',c:ad>=gS(s.breed,s.wop)?'var(--gr)':'var(--am)'},{l:'Forecast DOC',v:fN(s.forecast_doc||Math.round((s.set_qty||0)*ad/100)),c:'var(--gr)'}].map(k=>'<div><div class="mn" style="font-size:8px;color:var(--t3);text-transform:uppercase;margin-bottom:3px">'+k.l+'</div><div style="font-size:13px;color:'+(k.c||'var(--t)')+'">'+k.v+'</div></div>').join('')+'</div>'+
-        '<div class="mt12"><div class="fl aic jb" style="margin-bottom:3px"><span style="font-size:10px;color:var(--t3)">Day '+day+'/21</span><span style="font-size:10px;color:var(--t3)">'+Math.round(day/21*100)+'%</span></div><div class="pbar"><div class="pbf" style="width:'+day/21*100+'%;background:var(--am)"></div></div></div>'+
-        '</div>';}).join('')+
-    '<div class="card mt16"><div class="ct">Hatch Calendar</div><div class="ovx"><table><thead><tr>'+
-    thSort('sortSett','hatch_date','Hatch Date')+thSort('sortSett','set_id','Set ID')+thSort('sortSett','hatchery','Hatchery')+
-    '<th>Breed</th><th>WOP</th><th>Storage</th><th>Set Qty</th><th>Adj%</th><th>Forecast DOC</th><th>Status</th></tr></thead><tbody>'+
-    sortData(state.settings,state.sortSett.col,state.sortSett.dir).map(s=>{const ad=s.adj_hatchability||aH(s.breed,s.wop,s.storage_days);return '<tr><td class="mn ta">'+fS(s.hatch_date)+'</td><td class="mn tg">'+esc(s.set_id)+'</td><td style="font-size:11px">'+esc(s.hatchery)+'</td><td><span class="'+BC[bI(s.breed)]+'">'+esc(s.breed)+'</span></td><td class="mn">'+s.wop+'w</td><td>'+aBdg(s.storage_days,s.wop)+'</td><td class="mn tr">'+fN(s.set_qty)+'</td><td class="mn" style="color:'+(ad>=gS(s.breed,s.wop)?'var(--gr)':'var(--am)')+'">'+ad+'%</td><td class="mn tr tg">'+fN(s.forecast_doc)+'</td><td>'+sBdg(s.status)+'</td></tr>';}).join('')+
-    '</tbody></table></div></div></div>';
+  return'<div>'+filterBar([{type:'select',key:'fSchedH',label:'All Hatcheries',opts:HN},{type:'select',key:'fSchedS',label:'All Status',opts:['incubating','candling','transfer']}])+
+    (active.length===0?'<div class="al abl mb12">No active settings match filter.</div>':'')+
+    active.map(s=>{const day=Math.min(Math.max(dD(s.set_date,td()),0),21);const ad=s.adj_hatchability||aH(s.breed,s.wop,s.storage_days);return'<div class="card mb12"><div class="fl aic jb mb12"><div class="fl aic" style="gap:8px"><span class="mn tg" style="font-weight:600">'+esc(s.set_id)+'</span><span>'+esc(s.hatchery)+'</span><span class="'+BC[bI(s.breed)]+'">'+s.breed+'</span><span class="mn" style="color:var(--t3)">WOP '+s.wop+'w</span>'+aBdg(s.storage_days,s.wop)+'</div><div class="fl aic" style="gap:6px">'+sBdg(s.status)+(s.status==='incubating'&&day>=17?'<button class="btn bsec bsm" onclick="advSetting(\''+s.id+'\',\'candling\')">→ Candle</button>':'')+(s.status==='candling'?'<button class="btn bsec bsm" onclick="advSetting(\''+s.id+'\',\'transfer\')">→ Transfer</button>':'')+(s.status==='transfer'?'<button class="btn bpri bsm" onclick="openCompleteModal(\''+s.id+'\')">Complete Hatch</button>':'')+'</div></div>'+
+      '<div class="tline mb12">'+steps.map((st,i)=>{const dn=day>=st.d&&i<steps.length-1,ac=!dn&&Math.abs(day-st.d)<=1;return'<div class="tls '+(dn?'done':ac?'curr':'fut')+'"><div class="tld">'+(dn?'✓':st.d)+'</div><div class="tll">'+st.l+'</div></div>';}).join('')+'</div>'+
+      '<div class="gr4">'+[{l:'Set Date',v:fS(s.set_date)},{l:'Hatch Date',v:fS(s.hatch_date),c:'var(--am)'},{l:'Adj Hatch%',v:ad+'%',c:ad>=gS(s.breed,s.wop)?'var(--gr)':'var(--am)'},{l:'Forecast DOC',v:fN(s.forecast_doc||Math.round((s.set_qty||0)*ad/100)),c:'var(--gr)'}].map(k=>'<div><div style="font-size:10px;color:var(--t3);font-weight:600;margin-bottom:3px">'+k.l+'</div><div style="font-size:14px;font-weight:600;color:'+(k.c||'var(--t)')+'">'+k.v+'</div></div>').join('')+'</div>'+
+      '<div class="mt12"><div class="fl aic jb mb4"><span style="font-size:11px;color:var(--t3)">Day '+day+' / 21</span><span style="font-size:11px;color:var(--t3)">'+Math.round(day/21*100)+'%</span></div><div class="pbar"><div class="pbf" style="width:'+day/21*100+'%;background:var(--am)"></div></div></div></div>';}).join('')+
+    '<div class="card mt16"><div class="ct">Hatch Calendar (all)</div><div class="ovx"><table><thead><tr>'+thS('sortSett','hatch_date','Hatch Date')+thS('sortSett','set_id','Set ID')+thS('sortSett','hatchery','Hatchery')+'<th>Breed</th><th>WOP</th><th>Storage</th><th>Set Qty</th><th>Adj%</th><th>Forecast DOC</th><th>Status</th></tr></thead><tbody>'+
+    sortData(state.settings,state.sortSett.col,state.sortSett.dir).map(s=>{const ad=s.adj_hatchability||aH(s.breed,s.wop,s.storage_days);return'<tr><td class="mn ta">'+fS(s.hatch_date)+'</td><td class="mn tg">'+esc(s.set_id)+'</td><td>'+esc(s.hatchery)+'</td><td><span class="'+BC[bI(s.breed)]+'">'+s.breed+'</span></td><td class="mn">'+s.wop+'w</td><td>'+aBdg(s.storage_days,s.wop)+'</td><td class="mn ta-r">'+fN(s.set_qty)+'</td><td class="mn tg">'+ad+'%</td><td class="mn ta-r tg">'+fN(s.forecast_doc)+'</td><td>'+sBdg(s.status)+'</td></tr>';}).join('')+'</tbody></table></div></div></div>';
 }
 
 // ══════════════════════════════════════════
@@ -577,138 +469,70 @@ function pgSched(){
 function pgCandle(){
   const pending=state.settings.filter(s=>s.status==='candling');
   const done=state.settings.filter(s=>s.status!=='incubating'&&s.candling_clear!=null);
-  return '<div>'+
-    (pending.length?'<div class="mb16">'+pending.map(s=>'<div class="card mb12"><div class="fl aic jb mb12"><div><span class="mn tg">'+esc(s.set_id)+'</span><span style="margin-left:10px;font-size:12px">'+esc(s.hatchery)+'</span><span class="mn ta" style="margin-left:8px">Hatch: '+fS(s.hatch_date)+'</span></div><button class="btn bpri bsm" onclick="openCandleModal(\''+s.id+'\')">Enter Candling Results</button></div><div class="gr4">'+[{l:'Breed',v:s.breed},{l:'WOP',v:s.wop+'w'},{l:'Set Qty',v:fN(s.set_qty)},{l:'Adj Hatch%',v:(s.adj_hatchability||0)+'%'}].map(k=>'<div><div style="font-size:9px;color:var(--t3);font-family:var(--fm);text-transform:uppercase;margin-bottom:2px">'+k.l+'</div><div style="font-size:13px">'+k.v+'</div></div>').join('')+'</div></div>').join('')+'</div>':'<div class="al abl mb16">'+ic('info',12)+' No batches pending candling.</div>')+
-    (done.length?'<div class="card"><div class="ct">Candling History</div><div class="ovx"><table><thead><tr><th>Set ID</th><th>Hatchery</th><th>Breed</th><th>Set Qty</th><th>Clear</th><th>Infertile</th><th>Dead</th><th>Fertility%</th><th>Status</th></tr></thead><tbody>'+done.map(s=>{const fert=s.set_qty>0?((s.set_qty-(s.candling_infertile||0))/s.set_qty*100).toFixed(1):0;return '<tr><td class="mn tg">'+esc(s.set_id)+'</td><td style="font-size:11px">'+esc(s.hatchery)+'</td><td><span class="'+BC[bI(s.breed)]+'">'+esc(s.breed.split(' ')[0])+'</span></td><td class="mn tr">'+fN(s.set_qty)+'</td><td class="mn tr tg">'+fN(s.candling_clear)+'</td><td class="mn tr ta">'+fN(s.candling_infertile)+'</td><td class="mn tr tr2">'+fN(s.candling_dead)+'</td><td class="mn tr" style="color:'+(parseFloat(fert)>=90?'var(--gr)':'var(--am)')+'">'+fert+'%</td><td>'+sBdg(s.status)+'</td></tr>';}).join('')+'</tbody></table></div></div>':'')+'</div>';
+  return'<div>'+(pending.length?'<div class="mb16">'+pending.map(s=>'<div class="card mb12"><div class="fl aic jb mb12"><div><span class="mn tg" style="font-weight:600">'+esc(s.set_id)+'</span><span style="margin-left:10px">'+esc(s.hatchery)+'</span><span class="mn ta" style="margin-left:8px">Hatch: '+fS(s.hatch_date)+'</span></div><button class="btn bpri bsm" onclick="openCandleModal(\''+s.id+'\')">Enter Results</button></div><div class="gr4">'+[{l:'Breed',v:s.breed},{l:'WOP',v:s.wop+'w'},{l:'Set Qty',v:fN(s.set_qty)},{l:'Adj Hatch%',v:(s.adj_hatchability||0)+'%'}].map(k=>'<div><div style="font-size:10px;color:var(--t3);font-weight:600;margin-bottom:2px">'+k.l+'</div><div>'+k.v+'</div></div>').join('')+'</div></div>').join('')+'</div>':'<div class="al abl mb12">No batches pending candling.</div>')+
+    (done.length?'<div class="card"><div class="ct">Candling History</div><div class="ovx"><table><thead><tr><th>Set ID</th><th>Hatchery</th><th>Breed</th><th>Set Qty</th><th>Clear</th><th>Infertile</th><th>Dead</th><th>Fertility%</th><th>Status</th></tr></thead><tbody>'+done.map(s=>{const fe=s.set_qty>0?((s.set_qty-(s.candling_infertile||0))/s.set_qty*100).toFixed(1):0;return'<tr><td class="mn tg">'+esc(s.set_id)+'</td><td>'+esc(s.hatchery)+'</td><td><span class="'+BC[bI(s.breed)]+'">'+s.breed.split(' ')[0]+'</span></td><td class="mn ta-r">'+fN(s.set_qty)+'</td><td class="mn ta-r tg">'+fN(s.candling_clear)+'</td><td class="mn ta-r ta">'+fN(s.candling_infertile)+'</td><td class="mn ta-r tr2">'+fN(s.candling_dead)+'</td><td class="mn ta-r" style="color:'+(parseFloat(fe)>=90?'var(--gr)':'var(--am)')+'">'+fe+'%</td><td>'+sBdg(s.status)+'</td></tr>';}).join('')+'</tbody></table></div></div>':'')+'</div>';
 }
 
 // ══════════════════════════════════════════
-// DOC FORECAST vs DEMAND
+// FORECAST vs DEMAND
 // ══════════════════════════════════════════
 function pgForecast(){
-  const fWk=state.fFcWk||'';
-
-  // build supply forecast by hatch week
-  const supplyByWk={};
-  state.settings.filter(s=>s.status!=='completed').forEach(s=>{
-    const wk=s.hatch_week_no||isoWeek(s.hatch_date);
-    if(!supplyByWk[wk]) supplyByWk[wk]={wk,date:s.hatch_date,byH:{}};
-    supplyByWk[wk].byH[s.hatchery]=(supplyByWk[wk].byH[s.hatchery]||0)+(s.forecast_doc||0);
-  });
-
-  // build demand by week from doc_targets
-  const demandByWk={};
-  state.docTargets.forEach(t=>{
-    const wk=t.target_week;if(!wk)return;
-    demandByWk[wk]=(demandByWk[wk]||0)+(t.booking||0);
-  });
-
-  // union of all weeks
-  const allWks=[...new Set([...Object.keys(supplyByWk),...Object.keys(demandByWk)])].map(Number).sort((a,b)=>a-b);
-  const weeks=allWks.filter(wk=>!fWk||wk===parseInt(fWk)).slice(0,12);
-
-  // get unique weeks for filter dropdown
-  const wkOpts=[...new Set(allWks)].sort((a,b)=>a-b).map(String);
-
-  return '<div>'+
-    '<div class="al agr mb16">'+ic('info',12)+' Supply = forecast DOC from active egg settings. Demand = booking targets from DOC Tracker. Gap = Supply − Demand.</div>'+
+  const supByWk={};
+  state.settings.filter(s=>s.status!=='completed').forEach(s=>{const wk=s.hatch_week_no||isoWeek(s.hatch_date);if(!supByWk[wk])supByWk[wk]={wk,date:s.hatch_date,byH:{}};supByWk[wk].byH[s.hatchery]=(supByWk[wk].byH[s.hatchery]||0)+(s.forecast_doc||0);});
+  const demByWk={};
+  state.docTargets.forEach(t=>{if(t.target_week)demByWk[t.target_week]=(demByWk[t.target_week]||0)+(t.booking||0);});
+  const allWks=[...new Set([...Object.keys(supByWk),...Object.keys(demByWk)])].map(Number).sort((a,b)=>a-b);
+  const wkOpts=allWks.map(String);
+  const weeks=allWks.filter(wk=>!state.fFcWk||wk===parseInt(state.fFcWk)).slice(0,12);
+  return'<div><div class="al agr mb12">Supply = forecast DOC from egg settings. Demand = DOC Tracker booking targets. Gap = Supply − Demand.</div>'+
     filterBar([{type:'select',key:'fFcWk',label:'All Weeks',opts:wkOpts}])+
     (weeks.length?
-      '<div class="card mb16"><div class="ct">Forecast vs Demand by Week</div><div class="ovx"><table><thead><tr>'+
-      thSort('sortSett','hatch_week_no','Wk')+
-      '<th>Hatch Week</th>'+HN.map(h=>'<th>'+h+' DOC</th>').join('')+
-      '<th>Total Supply</th><th>Sales Demand</th><th>Gap</th><th>vs Cap</th></tr></thead><tbody>'+
-      weeks.map(wk=>{
-        const sw=supplyByWk[wk];
-        const totSupply=sw?Object.values(sw.byH).reduce((s,v)=>s+v,0):0;
-        const demand=demandByWk[wk]||0;
-        const gap=totSupply-demand;
-        const ratio=TOTAL_CAP>0?totSupply/TOTAL_CAP:0;
-        return '<tr><td class="mn"><b>W'+wk+'</b></td>'+
-          '<td class="mn ta">'+(sw?fS(sw.date):'—')+'</td>'+
-          HN.map(h=>'<td class="mn tr">'+(sw&&sw.byH[h]?fN(sw.byH[h]):'—')+'</td>').join('')+
-          '<td class="mn tr" style="font-weight:600;color:var(--gr)">'+fN(totSupply)+'</td>'+
-          '<td class="mn tr" style="color:var(--bl)">'+(demand?fN(demand):'—')+'</td>'+
-          '<td class="mn tr"><span class="'+(demand?(gap<0?'gap-neg':gap>0?'gap-pos':'gap-neu'):'gap-neu')+'">'+(demand?(gap>=0?'+':'')+fN(gap):'—')+'</span></td>'+
-          '<td class="mn" style="color:'+cC(ratio)+'">'+Math.round(ratio*100)+'% '+cL(ratio)+'</td>'+
-          '</tr>';}).join('')+
+      '<div class="card mb12"><div class="ct">Forecast vs Demand</div><div class="ovx"><table><thead><tr><th>Wk</th><th>Hatch Week</th>'+HN.map(h=>'<th>'+h+'</th>').join('')+'<th>Total Supply</th><th>Sales Demand</th><th>Gap</th><th>vs Cap</th></tr></thead><tbody>'+
+      weeks.map(wk=>{const sw=supByWk[wk],ts=sw?Object.values(sw.byH).reduce((s,v)=>s+v,0):0,dem=demByWk[wk]||0,gap=ts-dem,ratio=TOTAL_CAP>0?ts/TOTAL_CAP:0;return'<tr><td class="mn"><b>W'+wk+'</b></td><td class="mn ta">'+(sw?fS(sw.date):'—')+'</td>'+HN.map(h=>'<td class="mn ta-r">'+(sw&&sw.byH[h]?fN(sw.byH[h]):'—')+'</td>').join('')+'<td class="mn ta-r tg" style="font-weight:600">'+fN(ts)+'</td><td class="mn ta-r tb">'+(dem?fN(dem):'—')+'</td><td class="mn ta-r"><span class="'+(dem?(gap<0?'gap-neg':gap>0?'gap-pos':'gap-neu'):'gap-neu')+'">'+(dem?(gap>=0?'+':'')+fN(gap):'—')+'</span></td><td class="mn" style="color:'+cC(ratio)+'">'+Math.round(ratio*100)+'% '+cL(ratio)+'</td></tr>';}).join('')+
       '</tbody></table></div></div>'+
-      '<div class="card"><div class="ct">Visual Gap Analysis</div>'+
-      weeks.map(wk=>{
-        const sw=supplyByWk[wk];
-        const totSupply=sw?Object.values(sw.byH).reduce((s,v)=>s+v,0):0;
-        const demand=demandByWk[wk]||0;
-        const gap=totSupply-demand;
-        const maxVal=Math.max(totSupply,demand,TOTAL_CAP*.5)||1;
-        return '<div style="margin-bottom:14px">'+
-          '<div class="fl aic jb" style="margin-bottom:4px"><span style="font-size:12px;font-weight:500">W'+wk+(sw?' — '+fS(sw.date):'')+'</span>'+
-          '<span class="mn" style="color:'+(demand?(gap<0?'var(--re)':gap>0?'var(--gr)':'var(--t3)'):'var(--t3)')+'">Gap: '+(demand?(gap>=0?'+':'')+fN(gap):'no demand data')+'</span></div>'+
-          '<div style="display:flex;flex-direction:column;gap:3px">'+
-          '<div style="display:flex;align-items:center;gap:8px"><div style="font-size:10px;color:var(--t3);width:60px">Supply</div><div class="supply-bar" style="flex:1"><div class="supply-fill" style="width:'+Math.min(totSupply/maxVal*100,100)+'%;background:var(--gr)"></div></div><div class="mn tg" style="width:70px;text-align:right">'+fN(totSupply)+'</div></div>'+
-          '<div style="display:flex;align-items:center;gap:8px"><div style="font-size:10px;color:var(--t3);width:60px">Demand</div><div class="supply-bar" style="flex:1"><div class="supply-fill" style="width:'+Math.min(demand/maxVal*100,100)+'%;background:var(--bl)"></div></div><div class="mn tb" style="width:70px;text-align:right">'+fN(demand)+'</div></div>'+
-          '</div></div>';}).join('')+
-      '</div>'
-    :'<div class="card" style="text-align:center;padding:48px;color:var(--t3)">'+ic('trend',32,'var(--t3)')+'<div style="margin-top:12px">No active settings or demand data</div></div>')+
+      '<div class="card"><div class="ct">Visual Gap</div>'+weeks.map(wk=>{const sw=supByWk[wk],ts=sw?Object.values(sw.byH).reduce((s,v)=>s+v,0):0,dem=demByWk[wk]||0,gap=ts-dem,maxV=Math.max(ts,dem,1);return'<div style="margin-bottom:14px"><div class="fl aic jb mb8"><span style="font-weight:600">W'+wk+(sw?' — '+fS(sw.date):'')+'</span><span class="'+(dem?(gap<0?'gap-neg':gap>0?'gap-pos':'gap-neu'):'gap-neu')+'">Gap: '+(dem?(gap>=0?'+':'')+fN(gap):'no demand data')+'</span></div>'+['Supply','Demand'].map((lbl,i)=>{const val=i===0?ts:dem;const col=i===0?'var(--gr)':'var(--bl)';return'<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px"><div style="font-size:11px;color:var(--t3);width:56px">'+lbl+'</div><div class="sbar"><div class="sfill" style="width:'+Math.min(val/maxV*100,100)+'%;background:'+col+'"></div></div><div class="mn" style="width:70px;text-align:right;color:'+col+'">'+fN(val)+'</div></div>';}).join('')+'</div>';}).join('')+'</div>'
+    :'<div class="card" style="text-align:center;padding:40px;color:var(--t3)">No active settings or demand data</div>')+
     '</div>';
 }
 
 // ══════════════════════════════════════════
 // CAPACITY
 // ══════════════════════════════════════════
-function pgCapacity(){
-  return '<div><div class="gr2 mb16">'+HATCH.map(hh=>{const inUse=state.settings.filter(s=>s.hatchery===hh.name&&s.status!=='completed').reduce((a,r)=>a+(r.set_qty||0),0);const util=hh.wc>0?inUse/hh.wc:0;return '<div class="card"><div class="fl aic jb mb12"><div><div style="font-size:14px;font-weight:600;font-family:var(--fh)">'+hh.name+'</div><div class="mn" style="font-size:10px;color:var(--t3)">'+hh.typ+'</div></div><div style="text-align:right"><div style="font-size:22px;font-family:var(--fh);font-weight:800;color:'+cC(util)+'">'+Math.round(util*100)+'%</div><div style="font-size:9px;color:var(--t3)">'+cL(util)+'</div></div></div><div class="row-val"><span style="font-size:11px">Weekly Capacity</span><span class="mn">'+fN(hh.wc)+'</span></div><div class="row-val"><span style="font-size:11px">In Use</span><span class="mn tg">'+fN(inUse)+'</span></div><div class="row-val"><span style="font-size:11px">Available</span><span class="mn" style="color:var(--t3)">'+fN(hh.wc-inUse)+'</span></div><div class="pbar mt8" style="height:8px"><div class="pbf" style="width:'+Math.min(util*100,100)+'%;background:'+cC(util)+'"></div></div></div>';}).join('')+'</div></div>';
-}
+function pgCapacity(){return'<div><div class="gr2 mb12">'+HATCH.map(hh=>{const iu=state.settings.filter(s=>s.hatchery===hh.name&&s.status!=='completed').reduce((a,r)=>a+(r.set_qty||0),0);const u=hh.wc>0?iu/hh.wc:0;return'<div class="card"><div class="fl aic jb mb12"><div><div style="font-size:15px;font-weight:700">'+hh.name+'</div><div style="font-size:11px;color:var(--t3)">'+hh.typ+' Stage</div></div><div style="text-align:right"><div style="font-size:22px;font-weight:700;color:'+cC(u)+'">'+Math.round(u*100)+'%</div><div style="font-size:11px;color:var(--t3)">'+cL(u)+'</div></div></div><div class="row-val"><span>Weekly Capacity</span><span class="mn">'+fN(hh.wc)+'</span></div><div class="row-val"><span>In Use</span><span class="mn tg">'+fN(iu)+'</span></div><div class="row-val"><span>Available</span><span class="mn" style="color:var(--t3)">'+fN(hh.wc-iu)+'</span></div><div class="pbar mt8" style="height:6px"><div class="pbf" style="width:'+Math.min(u*100,100)+'%;background:'+cC(u)+'"></div></div></div>';}).join('')+'</div></div>';}
 
 // ══════════════════════════════════════════
 // BREED STANDARDS
 // ══════════════════════════════════════════
-function pgStandards(){
-  return '<div class="card"><div class="ct">Hatchability Standard by Breed & WOP</div><div class="ovx"><table><thead><tr><th>WOP</th>'+BREEDS.map(b=>'<th>'+b+'</th>').join('')+'</tr></thead><tbody>'+Array.from({length:27},(_,i)=>24+i).map(wop=>'<tr><td class="mn">'+wop+'w</td>'+BREEDS.map(b=>{const v=gS(b,wop);return '<td class="mn" style="color:'+(v>=85?'var(--gr)':v>=80?'var(--am)':'var(--re)')+'">'+v+'%</td>';}).join('')+'</tr>').join('')+'</tbody></table></div></div>';
-}
+function pgStandards(){return'<div class="card"><div class="ct">Hatchability Standard by Breed & WOP</div><div class="ovx"><table><thead><tr><th>WOP</th>'+BREEDS.map(b=>'<th>'+b+'</th>').join('')+'</tr></thead><tbody>'+Array.from({length:27},(_,i)=>24+i).map(wop=>'<tr><td class="mn">'+wop+'w</td>'+BREEDS.map(b=>{const v=gS(b,wop);return'<td class="mn" style="color:'+(v>=85?'var(--gr)':v>=80?'var(--am)':'var(--re)')+'">'+v+'%</td>';}).join('')+'</tr>').join('')+'</tbody></table></div></div>';}
 
 // ══════════════════════════════════════════
 // STORAGE RESEARCH
 // ══════════════════════════════════════════
-function pgResearch(){
-  return '<div><div class="card mb16"><div class="ct">Scientific Evidence</div><div class="gr3 mb16">'+[{t:'Day 1–7',c:'var(--gr)',b:'-0.2%/day',txt:'Every day up to 7 days decreases hatchability by 0.2pp. Ideal setting 3–5 days after collection.'},{t:'Day 8–10',c:'var(--am)',b:'-0.5%/day',txt:'Beyond 7 days decline accelerates. Early and late embryonic mortality increases.'},{t:'Day 11+ Critical',c:'var(--re)',b:'Avoid',txt:'Severe embryonic mortality. Old flock (WOP>38) eggs especially sensitive.'}].map(item=>'<div class="box"><div style="font-family:var(--fh);font-weight:700;font-size:13px;margin-bottom:6px;color:'+item.c+'">'+item.t+'</div><p style="font-size:11px;color:var(--t2);line-height:1.7">'+item.txt+'</p><span class="bdg mt8" style="margin-top:8px;display:inline-flex;background:'+item.c+'22;color:'+item.c+'">'+item.b+'</span></div>').join('')+'</div></div>'+
-    '<div class="card"><div class="ct">Interactive Decay Calculator</div><div class="fr2 mb16"><div class="fld"><label>Breed</label><select class="inp" id="calcBreed" onchange="updateCalc()">'+BREEDS.map(b=>'<option>'+b+'</option>').join('')+'</select></div><div class="fld"><label>WOP</label><input class="inp" type="number" id="calcWop" value="30" min="24" max="65" oninput="updateCalc()"/></div></div><div id="calcTable"></div></div></div>';
-}
-function updateCalc(){
-  const breed=document.getElementById('calcBreed')?.value||'Ross 308';
-  const wop=parseInt(document.getElementById('calcWop')?.value||30);
-  const std=gS(breed,wop);
-  const rows=Array.from({length:14},(_,i)=>i+1).map(d=>{const dec=dc(d,wop),ad=aH(breed,wop,d),loss=Math.round(10000*(std-ad)/100),rec=d<=5?'Optimal':d<=7?'Acceptable':d<=10?'Caution':'Critical',rc={Optimal:'var(--gr)',Acceptable:'var(--gr)',Caution:'var(--am)',Critical:'var(--re)'}[rec];return '<tr><td class="mn">Day '+d+'</td><td class="mn" style="color:var(--t3)">'+(d<=7?'-0.2%/d':'-0.5%/d')+'</td><td class="mn" style="color:'+(dec>3?'var(--re)':dec>1?'var(--am)':'var(--gr)')+'">-'+dec+'%</td><td class="mn" style="color:'+(ad>=(std-1)?'var(--gr)':ad>=(std-3)?'var(--am)':'var(--re)')+'">'+ad+'%</td><td class="mn" style="color:'+(loss>300?'var(--re)':loss>100?'var(--am)':'var(--gr)')+'">-'+fN(loss)+'</td><td><span class="bdg" style="background:'+rc+'22;color:'+rc+'">'+rec+'</span></td></tr>';});
-  const el=document.getElementById('calcTable');
-  if(el) el.innerHTML='<table><thead><tr><th>Day</th><th>Rate</th><th>Cumulative Decay</th><th>Adj Hatch%</th><th>DOC loss/10,000</th><th>Status</th></tr></thead><tbody>'+rows.join('')+'</tbody></table>';
-}
+function pgResearch(){return'<div><div class="card mb12"><div class="ct">Scientific Evidence</div><div class="gr3 mb12">'+[{t:'Day 1–7',c:'var(--gr)',b:'-0.2%/day',txt:'Each day reduces hatchability by 0.2pp. Optimal setting is 3–5 days after collection.'},{t:'Day 8–10',c:'var(--am)',b:'-0.5%/day',txt:'Decline accelerates. Early/late embryonic mortality increases significantly.'},{t:'Day 11+',c:'var(--re)',b:'Critical',txt:'Severe embryonic mortality. Old flock eggs (WOP>38) are especially sensitive after Day 5.'}].map(i=>'<div class="box"><div style="font-size:13px;font-weight:700;margin-bottom:6px;color:'+i.c+'">'+i.t+'</div><p style="font-size:12px;color:var(--t2);line-height:1.7">'+i.txt+'</p><span class="bdg" style="margin-top:8px;display:inline-flex;background:'+i.c+'22;color:'+i.c+'">'+i.b+'</span></div>').join('')+'</div></div>'+
+  '<div class="card"><div class="ct">Decay Calculator</div><div class="fr2 mb12"><div class="fld"><label>Breed</label><select class="inp" id="calcBreed" onchange="updateCalc()">'+BREEDS.map(b=>'<option>'+b+'</option>').join('')+'</select></div><div class="fld"><label>WOP</label><input class="inp" type="number" id="calcWop" value="30" min="24" max="65" oninput="updateCalc()"/></div></div><div id="calcTable"></div></div></div>';}
+
+function updateCalc(){const b=document.getElementById('calcBreed')?.value||'Ross 308',w=parseInt(document.getElementById('calcWop')?.value||30),std=gS(b,w);const rows=Array.from({length:14},(_,i)=>i+1).map(d=>{const dec=dc(d,w),ad=aH(b,w,d),loss=Math.round(10000*(std-ad)/100),rec=d<=5?'Optimal':d<=7?'Good':d<=10?'Caution':'Critical',rc={Optimal:'var(--gr)',Good:'var(--gr)',Caution:'var(--am)',Critical:'var(--re)'}[rec];return'<tr><td class="mn">Day '+d+'</td><td class="mn" style="color:var(--t3)">'+(d<=7?'-0.2%/d':'-0.5%/d')+'</td><td class="mn" style="color:'+(dec>3?'var(--re)':dec>1?'var(--am)':'var(--gr)')+'">-'+dec+'%</td><td class="mn" style="color:'+(ad>=(std-1)?'var(--gr)':ad>=(std-3)?'var(--am)':'var(--re)')+'">'+ad+'%</td><td class="mn" style="color:'+(loss>300?'var(--re)':loss>100?'var(--am)':'var(--gr)')+'">-'+fN(loss)+'</td><td><span class="bdg" style="background:'+rc+'22;color:'+rc+'">'+rec+'</span></td></tr>';});const el=document.getElementById('calcTable');if(el)el.innerHTML='<table><thead><tr><th>Day</th><th>Rate</th><th>Cumulative Decay</th><th>Adj Hatch%</th><th>DOC loss/10,000</th><th>Status</th></tr></thead><tbody>'+rows.join('')+'</tbody></table>';}
 
 // ══════════════════════════════════════════
 // REPORTS
 // ══════════════════════════════════════════
-function pgReports(){
-  const hist=state.settings.filter(s=>s.status==='completed'&&s.actual_doc);
-  const tHE=state.lots.reduce((s,l)=>s+(l.qty_received||0),0);
-  const tDoc=hist.reduce((s,r)=>s+(r.actual_doc||0),0);
-  const avgA=hist.length?(hist.reduce((s,r)=>s+(r.actual_hatch_pct||0),0)/hist.length).toFixed(1):0;
-  return '<div><div class="gr4 mb16">'+[{l:'Total HE Received',v:fN(tHE),c:'var(--bl)'},{l:'Total DOC Produced',v:fN(tDoc),c:'var(--gr)'},{l:'Avg Hatch%',v:avgA?avgA+'%':'—',c:'var(--am)'},{l:'Completed Batches',v:''+hist.length,c:'var(--pu)'}].map(k=>'<div class="card kpi"><div class="kl">'+k.l+'</div><div class="kv" style="color:'+k.c+';font-size:20px">'+k.v+'</div></div>').join('')+'</div>'+
-    '<div class="card"><div class="ct">Hatch History</div><div class="ovx"><table><thead><tr><th>Set ID</th><th>Hatchery</th><th>Breed</th><th>WOP</th><th>Set Qty</th><th>Adj Std%</th><th>Actual%</th><th>vs Std</th><th>DOC</th></tr></thead><tbody>'+
-    (hist.length?hist.map(r=>{const v=((r.actual_hatch_pct||0)-(r.adj_hatchability||0)).toFixed(1);return '<tr><td class="mn tg">'+esc(r.set_id)+'</td><td style="font-size:11px">'+esc(r.hatchery)+'</td><td><span class="'+BC[bI(r.breed)]+'">'+esc(r.breed.split(' ')[0])+'</span></td><td class="mn">'+r.wop+'w</td><td class="mn tr">'+fN(r.set_qty)+'</td><td class="mn" style="color:var(--t3)">'+(r.adj_hatchability||0)+'%</td><td class="mn" style="color:'+((r.actual_hatch_pct||0)>=(r.adj_hatchability||0)?'var(--gr)':'var(--re)')+'">'+( r.actual_hatch_pct||0)+'%</td><td class="mn" style="color:'+(parseFloat(v)>=0?'var(--gr)':'var(--re)')+'">'+( parseFloat(v)>=0?'+':'')+v+'pp</td><td class="mn tr tg">'+fN(r.actual_doc)+'</td></tr>';}).join(''):'<tr><td colspan="9" style="text-align:center;color:var(--t3);padding:28px">No completed batches yet</td></tr>')+
-    '</tbody></table></div></div></div>';
-}
+function pgReports(){const hist=state.settings.filter(s=>s.status==='completed'&&s.actual_doc);const tHE=state.lots.reduce((s,l)=>s+(l.qty_received||0),0),tDoc=hist.reduce((s,r)=>s+(r.actual_doc||0),0),avgA=hist.length?(hist.reduce((s,r)=>s+(r.actual_hatch_pct||0),0)/hist.length).toFixed(1):0;return'<div><div class="gr4 mb12">'+[{l:'Total HE Received',v:fN(tHE),c:'var(--bl)'},{l:'Total DOC Produced',v:fN(tDoc),c:'var(--gr)'},{l:'Avg Hatch%',v:avgA?avgA+'%':'—',c:'var(--am)'},{l:'Completed Batches',v:''+hist.length,c:'var(--pu)'}].map(k=>'<div class="card kpi"><div class="kl">'+k.l+'</div><div class="kv" style="color:'+k.c+';font-size:20px">'+k.v+'</div></div>').join('')+'</div>'+
+  '<div class="card"><div class="ct">Hatch History</div><div class="ovx"><table><thead><tr><th>Set ID</th><th>Hatchery</th><th>Breed</th><th>WOP</th><th>Set Qty</th><th>Adj Std%</th><th>Actual%</th><th>vs Std</th><th>DOC</th></tr></thead><tbody>'+(hist.length?hist.map(r=>{const v=((r.actual_hatch_pct||0)-(r.adj_hatchability||0)).toFixed(1);return'<tr><td class="mn tg">'+esc(r.set_id)+'</td><td>'+esc(r.hatchery)+'</td><td><span class="'+BC[bI(r.breed)]+'">'+r.breed.split(' ')[0]+'</span></td><td class="mn">'+r.wop+'w</td><td class="mn ta-r">'+fN(r.set_qty)+'</td><td class="mn" style="color:var(--t3)">'+(r.adj_hatchability||0)+'%</td><td class="mn" style="color:'+((r.actual_hatch_pct||0)>=(r.adj_hatchability||0)?'var(--gr)':'var(--re)')+'">'+( r.actual_hatch_pct||0)+'%</td><td class="mn" style="color:'+(parseFloat(v)>=0?'var(--gr)':'var(--re)')+'">'+( parseFloat(v)>=0?'+':'')+v+'pp</td><td class="mn ta-r tg">'+fN(r.actual_doc)+'</td></tr>';}).join(''):'<tr><td colspan="9" style="text-align:center;color:var(--t3);padding:20px">No completed batches</td></tr>')+'</tbody></table></div></div></div>';}
 
 // ══════════════════════════════════════════
 // MODALS
 // ══════════════════════════════════════════
-function showModal(html){const o=document.createElement('div');o.className='mov';o.id='activeModal';o.innerHTML='<div class="mo" onclick="event.stopPropagation()">'+html+'</div>';o.onclick=()=>closeModal();document.body.appendChild(o);}
+function showModal(h){const o=document.createElement('div');o.className='mov';o.id='activeModal';o.innerHTML='<div class="mo" onclick="event.stopPropagation()">'+h+'</div>';o.onclick=()=>closeModal();document.body.appendChild(o);}
 function closeModal(){document.getElementById('activeModal')?.remove();}
 
 function openFarmPlanModal(id){
   const p=id?state.farmPlans.find(x=>x.id===id):null;
   const curWk=isoWeek(td());
-  showModal('<div class="moh"><span class="mot">'+(p?'Edit':'Add')+' Farm Egg Plan</span><button class="btn bsec bsm" onclick="closeModal()">✕</button></div>'+
+  showModal('<div class="moh"><span class="mot">'+(p?'Edit W'+p.week_no:'Add Farm Plan Week')+'</span><button class="btn bsec bsm" onclick="closeModal()">✕</button></div>'+
     '<div class="mob"><div class="fr2 mb12"><div class="fld"><label>Week No</label><input class="inp" id="fp_week" type="number" value="'+(p?.week_no||curWk)+'"/></div><div class="fld"><label>Week End Date</label><input class="inp" id="fp_date" type="date" value="'+(p?.week_end_date||td())+'"/></div></div>'+
-    '<div style="font-size:9px;color:var(--t3);font-family:var(--fm);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Farm HE Production</div>'+
+    '<div style="font-size:10px;color:var(--t3);font-weight:600;text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px">Farm HE Production</div>'+
     '<div class="fr2 mb12">'+FARMS.map((f,i)=>'<div class="fld"><label>'+f+'</label><input class="inp" id="fp_'+FARM_KEYS[i]+'" type="number" value="'+(p?.[FARM_KEYS[i]]||0)+'" placeholder="0"/></div>').join('')+'</div>'+
+    '<div style="font-size:10px;color:var(--t3);font-weight:600;text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px">External Purchase</div>'+
     '<div class="fr2 mb12"><div class="fld"><label>Plan Buy HE</label><input class="inp" id="fp_plan_buy" type="number" value="'+(p?.plan_buy_he||0)+'"/></div><div class="fld"><label>Actual Buy HE</label><input class="inp" id="fp_actual_buy" type="number" value="'+(p?.actual_buy_he||0)+'"/></div></div>'+
     '<div class="fld"><label>Notes</label><input class="inp" id="fp_notes" value="'+(p?.notes||'')+'"/></div></div>'+
     '<div class="mof"><button class="btn bsec" onclick="closeModal()">Cancel</button><button class="btn bpri" onclick="saveFarmPlan(\''+(p?.id||'')+'\')">Save</button></div>');
@@ -725,89 +549,67 @@ async function saveFarmPlan(id){
 function openLotModal(){
   const n=String(state.lots.length+1).padStart(4,'0');
   showModal('<div class="moh"><span class="mot">Record HE Delivery</span><button class="btn bsec bsm" onclick="closeModal()">✕</button></div>'+
-    '<div class="mob"><div class="fr2 mb12"><div class="fld"><label>Source</label><div style="display:flex;gap:6px;margin-bottom:6px"><button class="btn bsm bpri" id="srcOwn" onclick="toggleSrc(false)">Own Farm</button><button class="btn bsm bsec" id="srcExt" onclick="toggleSrc(true)">External</button></div><select class="inp" id="lot_farm">'+FARMS.map(f=>'<option>'+f+'</option>').join('')+'</select><input class="inp" id="lot_ext" placeholder="External supplier name" style="display:none;margin-top:6px"/></div>'+
+    '<div class="mob"><div class="fr2 mb12"><div class="fld"><label>Source</label><div style="display:flex;gap:6px;margin-bottom:6px"><button class="btn bsm bpri" id="srcOwn" onclick="toggleSrc(false)">Own Farm</button><button class="btn bsm bsec" id="srcExt" onclick="toggleSrc(true)">External</button></div><select class="inp" id="lot_farm">'+FARMS.map(f=>'<option>'+f+'</option>').join('')+'</select><input class="inp" id="lot_ext" placeholder="Supplier name" style="display:none;margin-top:6px"/></div>'+
     '<div class="fld"><label>To Hatchery</label><select class="inp" id="lot_hatchery">'+HN.map(h=>'<option>'+h+'</option>').join('')+'</select></div></div>'+
-    '<div class="fr2 mb12"><div class="fld"><label>Breed</label><select class="inp" id="lot_breed" onchange="updateLotPrev()">'+BREEDS.map(b=>'<option>'+b+'</option>').join('')+'</select></div><div class="fld"><label>WOP</label><input class="inp" type="number" id="lot_wop" min="24" max="65" placeholder="e.g. 30" oninput="updateLotPrev()"/></div></div>'+
+    '<div class="fr2 mb12"><div class="fld"><label>Breed</label><select class="inp" id="lot_breed" onchange="updateLotPrev()">'+BREEDS.map(b=>'<option>'+b+'</option>').join('')+'</select></div><div class="fld"><label>WOP (Week of Production)</label><input class="inp" type="number" id="lot_wop" min="24" max="65" placeholder="e.g. 30" oninput="updateLotPrev()"/></div></div>'+
     '<div class="fr2 mb12"><div class="fld"><label>HE Quantity</label><input class="inp" type="number" id="lot_qty" placeholder="e.g. 22000"/></div><div class="fld"><label>Received Date</label><input class="inp" type="date" id="lot_date" value="'+td()+'"/></div></div>'+
     '<div id="lotPrev"></div><div class="fld mt8"><label>Lot ID</label><input class="inp" id="lot_id" value="LOT-'+n+'" style="color:var(--t3)"/></div></div>'+
-    '<div class="mof"><button class="btn bsec" onclick="closeModal()">Cancel</button><button class="btn bpri" onclick="saveLot()">Save Delivery</button></div>');
+    '<div class="mof"><button class="btn bsec" onclick="closeModal()">Cancel</button><button class="btn bpri" onclick="saveLot()">Save</button></div>');
 }
-function toggleSrc(isExt){document.getElementById('lot_farm').style.display=isExt?'none':'block';document.getElementById('lot_ext').style.display=isExt?'block':'none';document.getElementById('srcOwn').className='btn bsm '+(isExt?'bsec':'bpri');document.getElementById('srcExt').className='btn bsm '+(isExt?'bpri':'bsec');document.getElementById('srcExt').dataset.ext=isExt?'1':'0';}
-function updateLotPrev(){const breed=document.getElementById('lot_breed')?.value,wop=parseInt(document.getElementById('lot_wop')?.value||0);if(!breed||!wop)return;const std=gS(breed,wop);const el=document.getElementById('lotPrev');if(el)el.innerHTML='<div class="box"><div class="row-val"><span>Std WOP '+wop+'</span><b>'+std+'%</b></div><div class="row-val"><span>After 3d</span><b class="tg">'+aH(breed,wop,3)+'%</b></div><div class="row-val"><span>After 7d</span><b class="ta">'+aH(breed,wop,7)+'%</b></div></div>';}
+function toggleSrc(e){document.getElementById('lot_farm').style.display=e?'none':'block';document.getElementById('lot_ext').style.display=e?'block':'none';document.getElementById('srcOwn').className='btn bsm '+(e?'bsec':'bpri');document.getElementById('srcExt').className='btn bsm '+(e?'bpri':'bsec');document.getElementById('srcExt').dataset.ext=e?'1':'0';}
+function updateLotPrev(){const b=document.getElementById('lot_breed')?.value,w=parseInt(document.getElementById('lot_wop')?.value||0);if(!b||!w)return;const std=gS(b,w);const el=document.getElementById('lotPrev');if(el)el.innerHTML='<div class="box" style="margin-top:10px"><div class="row-val"><span>Std WOP '+w+'</span><b>'+std+'%</b></div><div class="row-val"><span>After 3d setting</span><b class="tg">'+aH(b,w,3)+'%</b></div><div class="row-val"><span>After 7d setting</span><b class="ta">'+aH(b,w,7)+'%</b></div></div>';}
 async function saveLot(){
-  const isExt=document.getElementById('srcExt')?.dataset.ext==='1';
+  const e=document.getElementById('srcExt')?.dataset.ext==='1';
   const qty=parseInt(document.getElementById('lot_qty').value)||0;if(!qty){toast('Enter HE quantity','error');return;}
   const wop=parseInt(document.getElementById('lot_wop').value)||0;if(!wop){toast('Enter WOP','error');return;}
-  const d={lot_id:document.getElementById('lot_id').value,farm:isExt?'External':document.getElementById('lot_farm').value,hatchery:document.getElementById('lot_hatchery').value,breed:document.getElementById('lot_breed').value,wop,qty_received:qty,stock_remaining:qty,recv_date:document.getElementById('lot_date').value,is_external:isExt,external_source:isExt?document.getElementById('lot_ext').value:null,status:'cool_room',created_by:state.user.id};
-  const {error}=await sb.from('egg_lots').insert(d);if(error){toast(error.message,'error');return;}
+  const d={lot_id:document.getElementById('lot_id').value,farm:e?'External':document.getElementById('lot_farm').value,hatchery:document.getElementById('lot_hatchery').value,breed:document.getElementById('lot_breed').value,wop,qty_received:qty,stock_remaining:qty,recv_date:document.getElementById('lot_date').value,is_external:e,external_source:e?document.getElementById('lot_ext').value:null,status:'cool_room',created_by:state.user.id};
+  const{error}=await sb.from('egg_lots').insert(d);if(error){toast(error.message,'error');return;}
   toast('Lot recorded');closeModal();await loadLots();
 }
 
 function openSetModal(lotId){
   const lot=state.lots.find(l=>l.id===lotId);if(!lot)return;
   const n=String(state.settings.length+1).padStart(4,'0');
-  const age=Math.max(dD(lot.recv_date,td()),0);
-  const std=gS(lot.breed,lot.wop),adj=aH(lot.breed,lot.wop,age);
+  const age=Math.max(dD(lot.recv_date,td()),0),std=gS(lot.breed,lot.wop),adj=aH(lot.breed,lot.wop,age);
   showModal('<div class="moh"><span class="mot">Initiate Setting — '+lot.lot_id+'</span><button class="btn bsec bsm" onclick="closeModal()">✕</button></div>'+
     '<div class="mob"><div class="box mb12">'+lot.breed+' | WOP '+lot.wop+' | '+lot.farm+' → '+lot.hatchery+' | <b class="tg">'+fN(lot.stock_remaining)+' HE</b></div>'+
     '<div class="fr2 mb12"><div class="fld"><label>Setting Quantity</label><input class="inp" type="number" id="set_qty" placeholder="'+lot.stock_remaining+'" max="'+lot.stock_remaining+'" oninput="updateSetPrev(\''+lotId+'\')"/></div><div class="fld"><label>Setting Date</label><input class="inp" type="date" id="set_date" value="'+td()+'" oninput="updateSetPrev(\''+lotId+'\')"/></div></div>'+
-    '<div id="setPrev"><div class="box"><div class="row-val"><span>Storage days</span><b>'+age+'d</b></div><div class="row-val"><span>Std WOP '+lot.wop+'</span><b>'+std+'%</b></div><div class="row-val"><span>Storage decay</span><b class="ta">-'+dc(age,lot.wop)+'%</b></div><div class="row-val"><span>Adj hatchability</span><b class="tg">'+adj+'%</b></div><div class="sep"></div><div class="row-val"><span>Hatch date</span><b class="ta">'+fD(aD(td(),21))+'</b></div></div></div>'+
+    '<div id="setPrev"><div class="box"><div class="row-val"><span>Storage days</span><b>'+age+'d</b></div><div class="row-val"><span>Std WOP '+lot.wop+'</span><b>'+std+'%</b></div><div class="row-val"><span>Decay</span><b class="ta">-'+dc(age,lot.wop)+'%</b></div><div class="row-val"><span>Adj hatchability</span><b class="tg">'+adj+'%</b></div><div class="sep"></div><div class="row-val"><span>Hatch date (+21d)</span><b class="ta">'+fD(aD(td(),21))+'</b></div></div></div>'+
     '<div class="fld mt8"><label>Set ID</label><input class="inp" id="set_id" value="SET-'+n+'" style="color:var(--t3)"/></div></div>'+
     '<div class="mof"><button class="btn bsec" onclick="closeModal()">Cancel</button><button class="btn bpri" onclick="confirmSetting(\''+lotId+'\')">Confirm Setting</button></div>');
 }
 function updateSetPrev(lotId){
   const lot=state.lots.find(l=>l.id===lotId);if(!lot)return;
-  const setDate=document.getElementById('set_date')?.value||td();
+  const sd=document.getElementById('set_date')?.value||td();
   const qty=parseInt(document.getElementById('set_qty')?.value||0);
-  const age=Math.max(dD(lot.recv_date,setDate),0);
-  const std=gS(lot.breed,lot.wop),adj=aH(lot.breed,lot.wop,age),dec=dc(age,lot.wop);
+  const age=Math.max(dD(lot.recv_date,sd),0),std=gS(lot.breed,lot.wop),adj=aH(lot.breed,lot.wop,age),dec=dc(age,lot.wop);
   const el=document.getElementById('setPrev');
-  if(el)el.innerHTML='<div class="box"><div class="row-val"><span>Storage days</span><b>'+age+'d</b></div><div class="row-val"><span>Std WOP '+lot.wop+'</span><b>'+std+'%</b></div><div class="row-val"><span>Storage decay</span><b class="ta">-'+dec+'%</b></div><div class="row-val"><span>Adj hatchability</span><b class="tg">'+adj+'%</b></div><div class="sep"></div><div class="row-val"><span>Hatch date</span><b class="ta">'+fD(aD(setDate,21))+'</b></div>'+(qty?'<div class="row-val"><span>Expected DOC</span><b class="tg" style="font-size:15px">'+fN(Math.round(qty*adj/100))+'</b></div>':'')+'</div>';
+  if(el)el.innerHTML='<div class="box"><div class="row-val"><span>Storage days</span><b>'+age+'d</b></div><div class="row-val"><span>Std WOP '+lot.wop+'</span><b>'+std+'%</b></div><div class="row-val"><span>Decay</span><b class="ta">-'+dec+'%</b></div><div class="row-val"><span>Adj hatchability</span><b class="tg">'+adj+'%</b></div><div class="sep"></div><div class="row-val"><span>Hatch date (+21d)</span><b class="ta">'+fD(aD(sd,21))+'</b></div>'+(qty?'<div class="row-val"><span>Expected DOC</span><b class="tg" style="font-size:16px;font-weight:700">'+fN(Math.round(qty*adj/100))+'</b></div>':'')+'</div>';
 }
 async function confirmSetting(lotId){
   const lot=state.lots.find(l=>l.id===lotId);if(!lot)return;
-  const qty=parseInt(document.getElementById('set_qty').value)||0;if(!qty){toast('Enter setting quantity','error');return;}
+  const qty=parseInt(document.getElementById('set_qty').value)||0;if(!qty){toast('Enter quantity','error');return;}
   if(qty>lot.stock_remaining){toast('Exceeds stock','error');return;}
-  const setDate=document.getElementById('set_date').value;
-  const age=Math.max(dD(lot.recv_date,setDate),0);
-  const std=gS(lot.breed,lot.wop),adj=aH(lot.breed,lot.wop,age),dec=dc(age,lot.wop);
-  const hDate=aD(setDate,21),hWk=isoWeek(hDate);
-  const {error:se}=await sb.from('egg_settings').insert({set_id:document.getElementById('set_id').value,lot_id:lot.id,hatchery:lot.hatchery,breed:lot.breed,wop:lot.wop,storage_days:age,set_qty:qty,set_date:setDate,hatch_week_no:hWk,std_hatchability:std,storage_decay:dec,adj_hatchability:adj,forecast_doc:Math.round(qty*adj/100),status:'incubating',created_by:state.user.id});
+  const sd=document.getElementById('set_date').value;
+  const age=Math.max(dD(lot.recv_date,sd),0),std=gS(lot.breed,lot.wop),adj=aH(lot.breed,lot.wop,age),dec=dc(age,lot.wop);
+  const hd=aD(sd,21),hWk=isoWeek(hd);
+  const{error:se}=await sb.from('egg_settings').insert({set_id:document.getElementById('set_id').value,lot_id:lot.id,hatchery:lot.hatchery,breed:lot.breed,wop:lot.wop,storage_days:age,set_qty:qty,set_date:sd,hatch_week_no:hWk,std_hatchability:std,storage_decay:dec,adj_hatchability:adj,forecast_doc:Math.round(qty*adj/100),status:'incubating',created_by:state.user.id});
   if(se){toast(se.message,'error');return;}
-  const newStock=lot.stock_remaining-qty;
-  await sb.from('egg_lots').update({stock_remaining:newStock,status:newStock===0?'incubating':'cool_room'}).eq('id',lot.id);
-  toast('Setting confirmed — Hatch '+fS(hDate)+', Forecast '+fN(Math.round(qty*adj/100))+' DOC');
+  const ns=lot.stock_remaining-qty;
+  await sb.from('egg_lots').update({stock_remaining:ns,status:ns===0?'incubating':'cool_room'}).eq('id',lot.id);
+  toast('Setting confirmed — Hatch '+fS(hd)+', Forecast '+fN(Math.round(qty*adj/100))+' DOC');
   closeModal();await Promise.all([loadLots(),loadSettings()]);setState({page:'sched'});
 }
-async function advSetting(id,newStatus){const {error}=await sb.from('egg_settings').update({status:newStatus}).eq('id',id);if(error){toast(error.message,'error');return;}toast('Status → '+newStatus);await loadSettings();}
+async function advSetting(id,ns){const{error}=await sb.from('egg_settings').update({status:ns}).eq('id',id);if(error){toast(error.message,'error');return;}toast('Status updated → '+ns);await loadSettings();}
+function openCandleModal(sid){const s=state.settings.find(x=>x.id===sid);if(!s)return;showModal('<div class="moh"><span class="mot">Candling — '+s.set_id+'</span><button class="btn bsec bsm" onclick="closeModal()">✕</button></div><div class="mob"><div class="box mb12">'+s.breed+' | WOP '+s.wop+' | '+s.hatchery+' | Set: '+fN(s.set_qty)+'</div><div class="fr3 mb12"><div class="fld"><label>Clear (fertile)</label><input class="inp" type="number" id="c_clear" placeholder="0"/></div><div class="fld"><label>Infertile</label><input class="inp" type="number" id="c_inf" placeholder="0"/></div><div class="fld"><label>Dead in shell</label><input class="inp" type="number" id="c_dead" placeholder="0"/></div></div><div class="fld mb12"><label>Candling Date</label><input class="inp" type="date" id="c_date" value="'+td()+'"/></div></div><div class="mof"><button class="btn bsec" onclick="closeModal()">Cancel</button><button class="btn bpri" onclick="saveCandling(\''+sid+'\')">Save</button></div>');}
+async function saveCandling(id){const d={candling_date:document.getElementById('c_date').value,candling_clear:parseInt(document.getElementById('c_clear').value)||0,candling_infertile:parseInt(document.getElementById('c_inf').value)||0,candling_dead:parseInt(document.getElementById('c_dead').value)||0,status:'transfer'};const{error}=await sb.from('egg_settings').update(d).eq('id',id);if(error){toast(error.message,'error');return;}toast('Candling saved');closeModal();await loadSettings();}
+function openCompleteModal(sid){const s=state.settings.find(x=>x.id===sid);if(!s)return;showModal('<div class="moh"><span class="mot">Complete Hatch — '+s.set_id+'</span><button class="btn bsec bsm" onclick="closeModal()">✕</button></div><div class="mob"><div class="box mb12">'+s.breed+' | '+s.hatchery+' | Forecast: <b class="tg">'+fN(s.forecast_doc)+' DOC</b></div><div class="fr2 mb12"><div class="fld"><label>Actual DOC Produced</label><input class="inp" type="number" id="h_doc" placeholder="'+(s.forecast_doc||0)+'"/></div><div class="fld"><label>Actual Hatch%</label><input class="inp" type="number" step="0.1" id="h_pct" placeholder="'+(s.adj_hatchability||0)+'"/></div></div></div><div class="mof"><button class="btn bsec" onclick="closeModal()">Cancel</button><button class="btn bpri" onclick="completeHatch(\''+sid+'\')">Complete</button></div>');}
+async function completeHatch(id){const doc=parseInt(document.getElementById('h_doc').value)||0,pct=parseFloat(document.getElementById('h_pct').value)||0;const{error}=await sb.from('egg_settings').update({actual_doc:doc,actual_hatch_pct:pct,status:'completed'}).eq('id',id);if(error){toast(error.message,'error');return;}toast('Hatch completed — '+fN(doc)+' DOC');closeModal();await loadSettings();}
 
-function openCandleModal(settingId){
-  const s=state.settings.find(x=>x.id===settingId);if(!s)return;
-  showModal('<div class="moh"><span class="mot">Candling — '+s.set_id+'</span><button class="btn bsec bsm" onclick="closeModal()">✕</button></div>'+
-    '<div class="mob"><div class="box mb12">'+s.breed+' | WOP '+s.wop+' | '+s.hatchery+' | Set: '+fN(s.set_qty)+'</div>'+
-    '<div class="fr3 mb12"><div class="fld"><label>Clear (fertile)</label><input class="inp" type="number" id="c_clear" placeholder="0"/></div><div class="fld"><label>Infertile</label><input class="inp" type="number" id="c_inf" placeholder="0"/></div><div class="fld"><label>Dead in shell</label><input class="inp" type="number" id="c_dead" placeholder="0"/></div></div>'+
-    '<div class="fld mb12"><label>Candling Date</label><input class="inp" type="date" id="c_date" value="'+td()+'"/></div></div>'+
-    '<div class="mof"><button class="btn bsec" onclick="closeModal()">Cancel</button><button class="btn bpri" onclick="saveCandling(\''+settingId+'\')">Save</button></div>');
-}
-async function saveCandling(id){
-  const d={candling_date:document.getElementById('c_date').value,candling_clear:parseInt(document.getElementById('c_clear').value)||0,candling_infertile:parseInt(document.getElementById('c_inf').value)||0,candling_dead:parseInt(document.getElementById('c_dead').value)||0,status:'transfer'};
-  const {error}=await sb.from('egg_settings').update(d).eq('id',id);if(error){toast(error.message,'error');return;}toast('Candling saved');closeModal();await loadSettings();
-}
+// scroll to current week in supply table
+function scrollToCurrentWeek(){const el=document.getElementById('sup-w'+isoWeek(td()));if(el){el.scrollIntoView({behavior:'smooth',block:'center'});el.style.outline='2px solid var(--gr)';setTimeout(()=>{el.style.outline='';},2000);}}
 
-function openCompleteModal(settingId){
-  const s=state.settings.find(x=>x.id===settingId);if(!s)return;
-  showModal('<div class="moh"><span class="mot">Complete Hatch — '+s.set_id+'</span><button class="btn bsec bsm" onclick="closeModal()">✕</button></div>'+
-    '<div class="mob"><div class="box mb12">'+s.breed+' | '+s.hatchery+' | Forecast DOC: <b class="tg">'+fN(s.forecast_doc)+'</b></div>'+
-    '<div class="fr2 mb12"><div class="fld"><label>Actual DOC Produced</label><input class="inp" type="number" id="h_doc" placeholder="'+(s.forecast_doc||0)+'"/></div><div class="fld"><label>Actual Hatch%</label><input class="inp" type="number" step="0.1" id="h_pct" placeholder="'+(s.adj_hatchability||0)+'"/></div></div></div>'+
-    '<div class="mof"><button class="btn bsec" onclick="closeModal()">Cancel</button><button class="btn bpri" onclick="completeHatch(\''+settingId+'\')">Complete</button></div>');
-}
-async function completeHatch(id){
-  const doc=parseInt(document.getElementById('h_doc').value)||0,pct=parseFloat(document.getElementById('h_pct').value)||0;
-  const {error}=await sb.from('egg_settings').update({actual_doc:doc,actual_hatch_pct:pct,status:'completed'}).eq('id',id);if(error){toast(error.message,'error');return;}
-  toast('Hatch completed — '+fN(doc)+' DOC');closeModal();await loadSettings();
-}
-
-// ── BOOT ──
+// ── Boot ──
 window.addEventListener('DOMContentLoaded',async()=>{await initSupabase();});
 </script>
 </body>
