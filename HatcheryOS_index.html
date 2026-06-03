@@ -219,7 +219,7 @@ function toast(msg,type='success'){const w=document.getElementById('toastWrap');
 // ── State ──
 let state={
   user:null,page:'db',loading:false,
-  lots:[],settings:[],farmPlans:[],docTargets:[],
+  lots:[],settings:[],farmPlans:[],docTargets:[],openingStock:[],
   sortLots:{col:'recv_date',dir:-1},
   sortSett:{col:'hatch_date',dir:1},
   sortCool:{col:'recv_date',dir:-1},
@@ -232,8 +232,9 @@ function thS(key,col,label){const s=state[key];return '<th class="sortable'+(s.c
 
 // ── Supabase ──
 async function initSupabase(){sb=supabase.createClient(SB_URL,SB_KEY);const{data:{session}}=await sb.auth.getSession();if(session)await afterLogin(session.user);else showLogin();}
-async function afterLogin(user){setState({user,loading:true});await loadAll();setState({loading:false});sb.channel('h-os').on('postgres_changes',{event:'*',schema:'public',table:'egg_lots'},()=>loadLots()).on('postgres_changes',{event:'*',schema:'public',table:'egg_settings'},()=>loadSettings()).on('postgres_changes',{event:'*',schema:'public',table:'farm_egg_plan'},()=>loadFarmPlans()).on('postgres_changes',{event:'*',schema:'public',table:'doc_targets'},()=>loadDocTargets()).subscribe();}
-async function loadAll(){await Promise.all([loadLots(),loadSettings(),loadFarmPlans(),loadDocTargets()]);}
+async function afterLogin(user){setState({user,loading:true});await loadAll();setState({loading:false});sb.channel('h-os').on('postgres_changes',{event:'*',schema:'public',table:'egg_lots'},()=>loadLots()).on('postgres_changes',{event:'*',schema:'public',table:'egg_settings'},()=>loadSettings()).on('postgres_changes',{event:'*',schema:'public',table:'farm_egg_plan'},()=>loadFarmPlans()).on('postgres_changes',{event:'*',schema:'public',table:'doc_targets'},()=>loadDocTargets()).on('postgres_changes',{event:'*',schema:'public',table:'cool_room_opening_stock'},()=>loadOpeningStock()).subscribe();}
+async function loadAll(){await Promise.all([loadLots(),loadSettings(),loadFarmPlans(),loadDocTargets(),loadOpeningStock()]);}
+async function loadOpeningStock(){try{const{data,error}=await sb.from('cool_room_opening_stock').select('*').order('week_no',{ascending:false}).limit(100);if(!error)setState({openingStock:data||[]});}catch(e){}}
 async function loadLots(){try{const{data,error}=await sb.from('egg_lots').select('*').order('recv_date',{ascending:false});if(!error)setState({lots:data||[]});}catch(e){}}
 async function loadSettings(){try{const{data,error}=await sb.from('egg_settings').select('*').order('hatch_date',{ascending:true});if(!error)setState({settings:data||[]});}catch(e){}}
 async function loadFarmPlans(){try{const{data,error}=await sb.from('farm_egg_plan').select('*').order('week_no',{ascending:true}).limit(60);if(!error)setState({farmPlans:data||[]});}catch(e){}}
@@ -241,7 +242,7 @@ async function loadDocTargets(){try{const{data,error}=await sb.from('doc_targets
 
 function showLogin(){document.getElementById('root').innerHTML=renderLogin();document.getElementById('loginPw').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});}
 async function doLogin(){const em=document.getElementById('loginEmail').value.trim(),pw=document.getElementById('loginPw').value,err=document.getElementById('loginErr');err.style.display='none';if(!em||!pw){err.textContent='Please enter email and password.';err.style.display='flex';return;}const{data,error}=await sb.auth.signInWithPassword({email:em,password:pw});if(error){err.textContent=error.message;err.style.display='flex';return;}await afterLogin(data.user);}
-async function doLogout(){await sb.auth.signOut();setState({user:null,lots:[],settings:[],farmPlans:[],docTargets:[]});showLogin();}
+async function doLogout(){await sb.auth.signOut();setState({user:null,lots:[],settings:[],farmPlans:[],docTargets:[],openingStock:[]});showLogin();}
 
 // ── Icons ──
 function ic(n,s=14,col=''){col=col||'currentColor';
@@ -380,6 +381,11 @@ function pgCool(){
   // per hatchery panels
   const panels=HATCH.filter(hh=>!filtH||hh.name===filtH).map(hh=>{
     const hl=coolLots.filter(l=>l.hatchery===hh.name);
+    // opening stock from DB for this hatchery, latest week
+    const curWkNo=isoWeek(td());
+    const prevWkNo=curWkNo-1;
+    const openingRows=state.openingStock.filter(r=>r.hatchery===hh.name&&r.week_no===prevWkNo);
+    const openingTotal=openingRows.reduce((s,r)=>s+(r.qty_he||0),0);
     const totalStock=hl.reduce((s,l)=>s+(l.stock_remaining||0),0);
     const totalExpDoc=hl.reduce((s,l)=>{const age=Math.max(dD(l.recv_date,td()),0);return s+Math.round((l.stock_remaining||0)*aH(l.breed,l.wop,age)/100);},0);
     // categorise: last week stock vs this week received
@@ -418,20 +424,26 @@ function pgCool(){
 
     return'<div class="cr-panel mb16">'+
       '<div class="cr-panel-head">'+
-        '<div style="display:flex;align-items:center;gap:16px">'+
+        '<div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">'+
           '<div style="font-size:15px;font-weight:700">'+hh.name+'</div>'+
-          '<div style="display:flex;gap:10px;align-items:center">'+
-            '<div><div style="font-size:10px;color:var(--t3);font-weight:600">PREV WK STOCK</div><div style="font-size:16px;font-weight:700;color:var(--bl)">'+fN(prevStock)+'</div></div>'+
+          '<div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap">'+
+            '<div style="cursor:pointer" onclick="openOpeningStockModal(''+hh.name+'')">'+
+              '<div style="font-size:10px;color:var(--t3);font-weight:600;display:flex;align-items:center;gap:4px">PREV WK OPENING STOCK'+
+                '<span style="color:var(--bl);font-size:9px">✏ edit</span>'+
+              '</div>'+
+              '<div style="font-size:16px;font-weight:700;color:var(--bl)">'+fN(openingTotal)+'</div>'+
+              (openingRows.length?'<div style="font-size:10px;color:var(--t3)">'+openingRows.map(r=>'<span style="color:'+BC[bI(r.breed)]+'">'+r.breed.split(' ')[0]+': '+fN(r.qty_he)+'</span>').join(' · ')+'</div>':'<div style="font-size:10px;color:var(--t3)">click to add</div>')+
+            '</div>'+
             '<div style="color:var(--t3)">+</div>'+
             '<div><div style="font-size:10px;color:var(--t3);font-weight:600">THIS WK IN</div><div style="font-size:16px;font-weight:700;color:var(--gr)">'+fN(thisIn)+'</div></div>'+
             '<div style="color:var(--t3)">=</div>'+
-            '<div><div style="font-size:10px;color:var(--t3);font-weight:600">TOTAL STOCK</div><div style="font-size:16px;font-weight:700;color:var(--t)">'+fN(totalStock)+'</div></div>'+
+            '<div><div style="font-size:10px;color:var(--t3);font-weight:600">TOTAL STOCK</div><div style="font-size:16px;font-weight:700;color:var(--t)">'+fN(openingTotal+thisIn)+'</div></div>'+
           '</div>'+
         '</div>'+
         '<div style="display:flex;align-items:center;gap:16px">'+
           '<div style="text-align:right"><div style="font-size:10px;color:var(--t3);font-weight:600">EXP DOC</div><div style="font-size:16px;font-weight:700;color:var(--pu)">'+fN(totalExpDoc)+'</div></div>'+
-          '<div style="text-align:right"><div style="font-size:10px;color:var(--t3);font-weight:600">CAPACITY UTIL</div><div style="font-size:14px;font-weight:700;color:'+cC(util)+'">'+Math.round(util*100)+'%</div></div>'+
-          '<div class="pbar" style="width:80px;height:6px"><div class="pbf" style="width:'+Math.min(util*100,100)+'%;background:'+cC(util)+'"></div></div>'+
+          '<div style="text-align:right"><div style="font-size:10px;color:var(--t3);font-weight:600">UTIL</div><div style="font-size:14px;font-weight:700;color:'+cC(util)+'">'+Math.round(util*100)+'%</div></div>'+
+          '<div class="pbar" style="width:60px;height:6px"><div class="pbf" style="width:'+Math.min(util*100,100)+'%;background:'+cC(util)+'"></div></div>'+
         '</div>'+
       '</div>'+
       (farmRows.length?
@@ -608,6 +620,54 @@ async function completeHatch(id){const doc=parseInt(document.getElementById('h_d
 
 // scroll to current week in supply table
 function scrollToCurrentWeek(){const el=document.getElementById('sup-w'+isoWeek(td()));if(el){el.scrollIntoView({behavior:'smooth',block:'center'});el.style.outline='2px solid var(--gr)';setTimeout(()=>{el.style.outline='';},2000);}}
+
+// ── Opening Stock Modal ──
+function openOpeningStockModal(hatcheryName){
+  const curWkNo=isoWeek(td());
+  const prevWkNo=curWkNo-1;
+  const existing=state.openingStock.filter(r=>r.hatchery===hatcheryName&&r.week_no===prevWkNo);
+  const getQ=(f,b)=>{const r=existing.find(x=>x.farm===f&&x.breed===b);return r?r.qty_he:0;};
+  const rows=FARMS.map(f=>
+    '<tr><td style="padding:8px 10px;font-size:12px;font-weight:500;color:var(--t)">'+f+'</td>'+
+    BREEDS.map(b=>'<td style="padding:6px 8px"><input class="inp" type="number" id="os_'+f.replace(/[^a-z]/gi,'_')+'_'+b.replace(/[^a-z]/gi,'_')+'" value="'+getQ(f,b)+'" placeholder="0" style="width:90px;padding:5px 8px;font-size:12px;text-align:right"/></td>').join('')+
+    '</tr>'
+  ).join('');
+  showModal(
+    '<div class="moh"><span class="mot">Opening Stock — '+hatcheryName+'</span><button class="btn bsec bsm" onclick="closeModal()">✕</button></div>'+
+    '<div class="mob">'+
+    '<div class="al abl mb12">'+ic('info',11)+' สต็อคไข่ยกมาจากสัปดาห์ที่แล้ว (W'+prevWkNo+') แยกตามฟาร์มและสายพันธุ์</div>'+
+    '<div class="ovx"><table style="width:100%;min-width:500px">'+
+    '<thead><tr><th style="padding:8px 10px">Farm</th>'+BREEDS.map(b=>'<th style="padding:8px 10px;text-align:center">'+b+'</th>').join('')+'</tr></thead>'+
+    '<tbody>'+rows+'</tbody>'+
+    '<tfoot><tr><td colspan="'+(BREEDS.length+1)+'" style="padding:10px;font-size:11px;color:var(--t3)">กรอก 0 ถ้าไม่มีสต็อคจากฟาร์มนั้น</td></tr></tfoot>'+
+    '</table></div></div>'+
+    '<div class="mof">'+
+    '<button class="btn bsec" onclick="closeModal()">Cancel</button>'+
+    '<button class="btn bpri" onclick="saveOpeningStock(''+hatcheryName+'','+prevWkNo+')">บันทึก Opening Stock</button>'+
+    '</div>'
+  );
+}
+
+async function saveOpeningStock(hatcheryName, weekNo){
+  const rows=[];
+  for(const f of FARMS){
+    for(const b of BREEDS){
+      const key='os_'+f.replace(/[^a-z]/gi,'_')+'_'+b.replace(/[^a-z]/gi,'_');
+      const el=document.getElementById(key);
+      const qty=parseInt(el?.value||0)||0;
+      if(qty>0) rows.push({hatchery:hatcheryName,week_no:weekNo,farm:f,breed:b,qty_he:qty,updated_at:new Date().toISOString()});
+    }
+  }
+  // delete existing rows for this hatchery+week first
+  await sb.from('cool_room_opening_stock').delete().eq('hatchery',hatcheryName).eq('week_no',weekNo);
+  if(rows.length>0){
+    const{error}=await sb.from('cool_room_opening_stock').insert(rows);
+    if(error){toast(error.message,'error');return;}
+  }
+  toast('Opening stock saved — '+hatcheryName+' W'+weekNo);
+  closeModal();
+  await loadOpeningStock();
+}
 
 // ── Boot ──
 window.addEventListener('DOMContentLoaded',async()=>{await initSupabase();});
