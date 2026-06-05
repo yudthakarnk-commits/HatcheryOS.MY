@@ -364,8 +364,33 @@ function pgDist(){
     '<div class="gr4 mb12">'+HATCH.map(hh=>{const hl=state.lots.filter(l=>l.hatchery===hh.name&&l.status==='cool_room');return'<div class="card kpi"><div class="kl">'+hh.name+'</div><div class="kv tg">'+fN(hl.reduce((s,l)=>s+(l.stock_remaining||0),0))+'</div><div class="ks">'+hl.length+' lots in cool room</div></div>';}).join('')+'</div>'+
     filterBar([{type:'select',key:'fLotH',label:'All Hatcheries',opts:HN},{type:'select',key:'fLotS',label:'All Status',opts:['cool_room','incubating','candling','transfer','completed']}])+
     '<div class="card"><div class="ct">All HE Lots ('+lots.length+')</div><div class="ovx"><table><thead><tr>'+
-    thS('sortLots','lot_id','Lot ID')+thS('sortLots','farm','Farm')+thS('sortLots','hatchery','Hatchery')+'<th>Breed</th>'+thS('sortLots','wop','WOP')+thS('sortLots','recv_date','Recv')+'<th>Age</th><th>Qty Recv</th><th>Stock</th><th>Std%</th><th>Decay</th><th>Adj%</th><th>Exp DOC</th><th>Status</th></tr></thead><tbody>'+
-    (lots.length?lots.map(l=>{const age=Math.max(dD(l.recv_date,td()),0),std=gS(l.breed,l.wop),dc2=dc(age,l.wop),ad=aH(l.breed,l.wop,age);return'<tr><td class="mn tg">'+esc(l.lot_id)+'</td><td>'+esc(l.farm)+'</td><td>'+esc(l.hatchery)+'</td><td><span class="'+BC[bI(l.breed)]+'">'+l.breed+'</span></td><td class="mn">'+l.wop+'w</td><td class="mn">'+fS(l.recv_date)+'</td><td>'+aBdg(age,l.wop)+'</td><td class="mn ta-r">'+fN(l.qty_received)+'</td><td class="mn ta-r">'+fN(l.stock_remaining)+'</td><td class="mn" style="color:var(--t3)">'+std+'%</td><td class="mn" style="color:'+(dc2>2?'var(--re)':dc2>.5?'var(--am)':'var(--gr)')+'">-'+dc2+'%</td><td class="mn" style="color:'+(ad>=(std-1)?'var(--gr)':ad>=(std-3)?'var(--am)':'var(--re)')+'">'+ad+'%</td><td class="mn ta-r">'+(l.status==='cool_room'?fN(Math.round((l.stock_remaining||0)*ad/100)):'set')+'</td><td>'+sBdg(l.status)+'</td></tr>';}).join(''):'<tr><td colspan="14" style="text-align:center;color:var(--t3);padding:24px">No lots recorded yet</td></tr>')+
+    thS('sortLots','lot_id','Lot ID')+thS('sortLots','farm','Farm')+thS('sortLots','hatchery','Hatchery')+'<th>Breed</th>'+thS('sortLots','wop','WOP')+thS('sortLots','recv_date','Recv')+'<th>Age</th><th>Qty Recv</th><th>Stock</th><th>Std%</th><th>Decay</th><th>Adj%</th><th>Exp DOC</th><th>Status</th><th>Action</th></tr></thead><tbody>'+
+    (lots.length?lots.map(l=>{
+      const age=Math.max(dD(l.recv_date,td()),0),std=gS(l.breed,l.wop),dc2=dc(age,l.wop),ad=aH(l.breed,l.wop,age);
+      const canEdit=l.status==='cool_room';
+      return'<tr>'+
+        '<td class="mn tg">'+esc(l.lot_id)+'</td>'+
+        '<td>'+esc(l.farm)+'</td>'+
+        '<td>'+esc(l.hatchery)+'</td>'+
+        '<td><span class="'+BC[bI(l.breed)]+'">'+l.breed+'</span></td>'+
+        '<td class="mn">'+l.wop+'w</td>'+
+        '<td class="mn">'+fS(l.recv_date)+'</td>'+
+        '<td>'+aBdg(age,l.wop)+'</td>'+
+        '<td class="mn ta-r">'+fN(l.qty_received)+'</td>'+
+        '<td class="mn ta-r">'+fN(l.stock_remaining)+'</td>'+
+        '<td class="mn" style="color:var(--t3)">'+std+'%</td>'+
+        '<td class="mn" style="color:'+(dc2>2?'var(--re)':dc2>.5?'var(--am)':'var(--gr)')+'">-'+dc2+'%</td>'+
+        '<td class="mn" style="color:'+(ad>=(std-1)?'var(--gr)':ad>=(std-3)?'var(--am)':'var(--re)')+'">'+ad+'%</td>'+
+        '<td class="mn ta-r">'+(canEdit?fN(Math.round((l.stock_remaining||0)*ad/100)):'set')+'</td>'+
+        '<td>'+sBdg(l.status)+'</td>'+
+        '<td style="white-space:nowrap">'+
+          (canEdit
+            ?'<button class="btn bsec bsm" style="margin-right:4px" data-lid="'+l.id+'" onclick="openEditLotModal(this.dataset.lid)">✏ Edit</button>'+
+              '<button class="btn bsm" style="background:var(--rel);color:var(--re);border:1px solid rgba(248,81,73,.3)" data-lid="'+l.id+'" data-lbl="'+esc(l.lot_id)+'" onclick="deleteLot(this.dataset.lid,this.dataset.lbl)">✕</button>'
+            :'<span style="font-size:10px;color:var(--t3)">locked</span>')+
+        '</td>'+
+      '</tr>';
+    }).join(''):'<tr><td colspan="15" style="text-align:center;color:var(--t3);padding:24px">No lots recorded yet</td></tr>')+
     '</tbody></table></div></div></div>';
 }
 
@@ -672,6 +697,60 @@ async function saveOpeningStock(hatcheryName, weekNo){
   toast('Opening stock saved — '+hatcheryName+' W'+weekNo);
   closeModal();
   await loadOpeningStock();
+}
+
+// ── Edit / Delete Lot ──
+function openEditLotModal(lotId){
+  const l=state.lots.find(x=>x.id===lotId);
+  if(!l) return;
+  showModal(
+    '<div class="moh"><span class="mot">Edit Lot — '+esc(l.lot_id)+'</span><button class="btn bsec bsm" onclick="closeModal()">✕</button></div>'+
+    '<div class="mob">'+
+    '<div class="al abl mb12">'+ic('info',11)+' แก้ไขได้เฉพาะ lot ที่ยังอยู่ใน Cool Room เท่านั้น</div>'+
+    '<div class="fr2 mb12">'+
+      '<div class="fld"><label>Farm</label><select class="inp" id="el_farm">'+FARMS.map(f=>'<option'+(l.farm===f?' selected':'')+'>'+f+'</option>').join('')+'<option'+(l.is_external?' selected':'')+' value="External">External</option></select></div>'+
+      '<div class="fld"><label>Hatchery</label><select class="inp" id="el_hatchery">'+HN.map(h=>'<option'+(l.hatchery===h?' selected':'')+'>'+h+'</option>').join('')+'</select></div>'+
+    '</div>'+
+    '<div class="fr2 mb12">'+
+      '<div class="fld"><label>Breed</label><select class="inp" id="el_breed">'+BREEDS.map(b=>'<option'+(l.breed===b?' selected':'')+'>'+b+'</option>').join('')+'</select></div>'+
+      '<div class="fld"><label>WOP</label><input class="inp" type="number" id="el_wop" value="'+l.wop+'" min="24" max="65"/></div>'+
+    '</div>'+
+    '<div class="fr3 mb12">'+
+      '<div class="fld"><label>Qty Received</label><input class="inp" type="number" id="el_qty_recv" value="'+l.qty_received+'"/></div>'+
+      '<div class="fld"><label>Stock Remaining</label><input class="inp" type="number" id="el_stock" value="'+l.stock_remaining+'"/></div>'+
+      '<div class="fld"><label>Received Date</label><input class="inp" type="date" id="el_date" value="'+l.recv_date+'"/></div>'+
+    '</div>'+
+    '</div>'+
+    '<div class="mof"><button class="btn bsec" onclick="closeModal()">Cancel</button><button class="btn bpri" id="saveEditLotBtn">บันทึกการแก้ไข</button></div>'
+  );
+  document.getElementById('saveEditLotBtn').addEventListener('click', ()=>saveEditLot(lotId));
+}
+
+async function saveEditLot(lotId){
+  const d={
+    farm: document.getElementById('el_farm').value,
+    hatchery: document.getElementById('el_hatchery').value,
+    breed: document.getElementById('el_breed').value,
+    wop: parseInt(document.getElementById('el_wop').value)||0,
+    qty_received: parseInt(document.getElementById('el_qty_recv').value)||0,
+    stock_remaining: parseInt(document.getElementById('el_stock').value)||0,
+    recv_date: document.getElementById('el_date').value,
+    updated_at: new Date().toISOString(),
+  };
+  if(!d.wop){toast('กรุณาใส่ WOP','error');return;}
+  const{error}=await sb.from('egg_lots').update(d).eq('id',lotId);
+  if(error){toast(error.message,'error');return;}
+  toast('Lot updated');
+  closeModal();
+  await loadLots();
+}
+
+async function deleteLot(lotId, lotLabel){
+  if(!confirm('ลบ Lot '+lotLabel+' ออกจากระบบ?\nการลบไม่สามารถย้อนกลับได้')) return;
+  const{error}=await sb.from('egg_lots').delete().eq('id',lotId);
+  if(error){toast(error.message,'error');return;}
+  toast('Lot '+lotLabel+' ลบแล้ว');
+  await loadLots();
 }
 
 // ── Boot ──
