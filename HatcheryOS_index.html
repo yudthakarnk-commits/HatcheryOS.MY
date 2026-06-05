@@ -360,7 +360,7 @@ function pgSupply(){
 function pgDist(){
   const lots=sortData(state.lots,state.sortLots.col,state.sortLots.dir).filter(l=>(!state.fLotH||l.hatchery===state.fLotH)&&(!state.fLotS||l.status===state.fLotS));
   return'<div>'+
-    '<div class="fl aic jb mb12"><div></div><button class="btn bpri" onclick="openLotModal()">'+ic('plus',12)+' Record HE Delivery</button></div>'+
+    '<div class="fl aic jb mb12"><div></div><div style="display:flex;gap:8px"><button class="btn bsec" onclick="openDOImportModal()">'+ic('doc',12)+' Import from DO</button><button class="btn bpri" onclick="openLotModal()">'+ic('plus',12)+' Record Single Lot</button></div></div>'+
     '<div class="gr4 mb12">'+HATCH.map(hh=>{const hl=state.lots.filter(l=>l.hatchery===hh.name&&l.status==='cool_room');return'<div class="card kpi"><div class="kl">'+hh.name+'</div><div class="kv tg">'+fN(hl.reduce((s,l)=>s+(l.stock_remaining||0),0))+'</div><div class="ks">'+hl.length+' lots in cool room</div></div>';}).join('')+'</div>'+
     filterBar([{type:'select',key:'fLotH',label:'All Hatcheries',opts:HN},{type:'select',key:'fLotS',label:'All Status',opts:['cool_room','incubating','candling','transfer','completed']}])+
     '<div class="card"><div class="ct">All HE Lots ('+lots.length+')</div><div class="ovx"><table><thead><tr>'+
@@ -771,6 +771,201 @@ async function deleteLot(lotId, lotLabel){
   if(error){toast(error.message,'error');return;}
   toast('Lot '+lotLabel+' deleted');
   await loadLots();
+}
+
+// ── DO Import Modal ──
+function openDOImportModal(){
+  const n=state.lots.length+1;
+  // Build flock rows (start with 3, can add more)
+  function buildRows(count){
+    let rows='';
+    for(let i=0;i<count;i++){
+      rows+=
+        '<tr id="do-row-'+i+'">'+
+        '<td style="padding:4px 6px"><input class="inp" type="text" id="do_flock_'+i+'" placeholder="H4" style="width:52px;padding:5px 7px;font-size:12px;text-align:center"/></td>'+
+        '<td style="padding:4px 6px"><input class="inp" type="number" id="do_wop_'+i+'" placeholder="39" min="24" max="65" style="width:60px;padding:5px 7px;font-size:12px;text-align:center" oninput="doUpdatePreview()"/></td>'+
+        '<td style="padding:4px 6px"><select class="inp" id="do_breed_'+i+'" style="width:110px;padding:5px 7px;font-size:12px" onchange="doUpdatePreview()">'+
+          BREEDS.map(b=>'<option>'+b+'</option>').join('')+
+        '</select></td>'+
+        '<td style="padding:4px 6px"><input class="inp" type="number" id="do_qty_'+i+'" placeholder="3400" style="width:80px;padding:5px 7px;font-size:12px;text-align:right" oninput="doUpdatePreview()"/></td>'+
+        '<td style="padding:4px 6px;text-align:center"><button onclick="removeDoRow('+i+')" style="background:var(--rel);color:var(--re);border:1px solid rgba(248,81,73,.3);border-radius:6px;padding:3px 8px;font-size:11px;cursor:pointer">✕</button></td>'+
+        '</tr>';
+    }
+    return rows;
+  }
+
+  showModal(
+    '<div class="moh">'+
+      '<span class="mot">Import from Delivery Order (DO)</span>'+
+      '<button class="btn bsec bsm" onclick="closeModal()">✕</button>'+
+    '</div>'+
+    '<div class="mob">'+
+
+    // Header section
+    '<div class="fr3 mb12">'+
+      '<div class="fld"><label>From Farm</label>'+
+        '<select class="inp" id="do_farm">'+
+          FARMS.map(f=>'<option>'+f+'</option>').join('')+
+          '<option value="External">External</option>'+
+        '</select>'+
+      '</div>'+
+      '<div class="fld"><label>To Hatchery</label>'+
+        '<select class="inp" id="do_hatchery">'+HN.map(h=>'<option>'+h+'</option>').join('')+'</select>'+
+      '</div>'+
+      '<div class="fld"><label>Delivery Date</label>'+
+        '<input class="inp" type="date" id="do_date" value="'+td()+'" onchange="doUpdatePreview()"/>'+
+      '</div>'+
+    '</div>'+
+
+    // Flock table
+    '<div style="font-size:10px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Flock details — enter each flock from the DO</div>'+
+    '<div class="ovx" style="margin-bottom:8px">'+
+      '<table style="width:100%;min-width:420px;border-collapse:collapse">'+
+        '<thead>'+
+          '<tr style="background:var(--bg4)">'+
+            '<th style="padding:6px 8px;font-size:10px;font-family:var(--fm);text-transform:uppercase;letter-spacing:.5px;color:var(--t3);text-align:left">Flock/House</th>'+
+            '<th style="padding:6px 8px;font-size:10px;font-family:var(--fm);text-transform:uppercase;letter-spacing:.5px;color:var(--t3);text-align:left">WOP</th>'+
+            '<th style="padding:6px 8px;font-size:10px;font-family:var(--fm);text-transform:uppercase;letter-spacing:.5px;color:var(--t3);text-align:left">Breed</th>'+
+            '<th style="padding:6px 8px;font-size:10px;font-family:var(--fm);text-transform:uppercase;letter-spacing:.5px;color:var(--t3);text-align:right">Qty (HE)</th>'+
+            '<th style="padding:6px 8px;width:36px"></th>'+
+          '</tr>'+
+        '</thead>'+
+        '<tbody id="do-tbody">'+buildRows(4)+'</tbody>'+
+      '</table>'+
+    '</div>'+
+    '<button onclick="addDoRow()" class="btn bsec bsm" style="margin-bottom:14px">+ Add Flock Row</button>'+
+
+    // Preview section
+    '<div id="do-preview"></div>'+
+
+    '</div>'+
+    '<div class="mof">'+
+      '<button class="btn bsec" onclick="closeModal()">Cancel</button>'+
+      '<button class="btn bpri" id="doSaveBtn" style="min-width:140px">Save Lots from DO</button>'+
+    '</div>'
+  );
+
+  // bind save
+  document.getElementById('doSaveBtn').addEventListener('click', saveDOImport);
+  // initial preview
+  doUpdatePreview();
+}
+
+// Track row count
+let _doRowCount = 4;
+
+function addDoRow(){
+  const i = _doRowCount++;
+  const tbody = document.getElementById('do-tbody');
+  if(!tbody) return;
+  const tr = document.createElement('tr');
+  tr.id = 'do-row-'+i;
+  tr.innerHTML =
+    '<td style="padding:4px 6px"><input class="inp" type="text" id="do_flock_'+i+'" placeholder="H.." style="width:52px;padding:5px 7px;font-size:12px;text-align:center"/></td>'+
+    '<td style="padding:4px 6px"><input class="inp" type="number" id="do_wop_'+i+'" placeholder="39" min="24" max="65" style="width:60px;padding:5px 7px;font-size:12px;text-align:center" oninput="doUpdatePreview()"/></td>'+
+    '<td style="padding:4px 6px"><select class="inp" id="do_breed_'+i+'" style="width:110px;padding:5px 7px;font-size:12px" onchange="doUpdatePreview()">'+
+      BREEDS.map(b=>'<option>'+b+'</option>').join('')+
+    '</select></td>'+
+    '<td style="padding:4px 6px"><input class="inp" type="number" id="do_qty_'+i+'" placeholder="0" style="width:80px;padding:5px 7px;font-size:12px;text-align:right" oninput="doUpdatePreview()"/></td>'+
+    '<td style="padding:4px 6px;text-align:center"><button onclick="removeDoRow('+i+')" style="background:var(--rel);color:var(--re);border:1px solid rgba(248,81,73,.3);border-radius:6px;padding:3px 8px;font-size:11px;cursor:pointer">✕</button></td>';
+  tbody.appendChild(tr);
+  doUpdatePreview();
+}
+
+function removeDoRow(i){
+  document.getElementById('do-row-'+i)?.remove();
+  doUpdatePreview();
+}
+
+function collectDORows(){
+  // collect all visible rows, merge by breed+WOP
+  const merged = {};
+  for(let i=0; i<_doRowCount; i++){
+    const wopEl = document.getElementById('do_wop_'+i);
+    const qtyEl = document.getElementById('do_qty_'+i);
+    const breedEl = document.getElementById('do_breed_'+i);
+    if(!wopEl || !qtyEl || !breedEl) continue;
+    const wop = parseInt(wopEl.value)||0;
+    const qty = parseInt(qtyEl.value)||0;
+    const breed = breedEl.value;
+    if(!wop || !qty) continue;
+    const key = breed+'|'+wop;
+    if(!merged[key]) merged[key]={breed,wop,qty:0,flocks:[]};
+    merged[key].qty += qty;
+    const flockEl = document.getElementById('do_flock_'+i);
+    if(flockEl?.value) merged[key].flocks.push(flockEl.value);
+  }
+  return Object.values(merged);
+}
+
+function doUpdatePreview(){
+  const rows = collectDORows();
+  const el = document.getElementById('do-preview');
+  if(!el) return;
+  if(!rows.length){
+    el.innerHTML = '<div class="box" style="color:var(--t3);font-size:12px">Enter flock details above to preview lots</div>';
+    return;
+  }
+  const farm = document.getElementById('do_farm')?.value||'';
+  const hatchery = document.getElementById('do_hatchery')?.value||'';
+  const date = document.getElementById('do_date')?.value||td();
+  const totalHE = rows.reduce((s,r)=>s+r.qty,0);
+
+  let preview = '<div style="font-size:10px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Preview — '+rows.length+' lot'+(rows.length>1?'s':'')+' will be created (total: '+fN(totalHE)+' HE)</div>';
+  preview += '<div style="border:1px solid var(--bor);border-radius:var(--r);overflow:hidden">';
+  rows.forEach((r,idx)=>{
+    const std = gS(r.breed, r.wop);
+    const lotNum = String(state.lots.length + idx + 1).padStart(4,'0');
+    const bg = idx%2===0?'var(--bg3)':'var(--bg4)';
+    preview +=
+      '<div style="display:grid;grid-template-columns:90px 70px 110px 80px 80px 1fr;gap:0;background:'+bg+';padding:8px 12px;align-items:center">'+
+      '<div style="font-size:11px;font-family:var(--fm);color:var(--tg, var(--gr))">LOT-'+lotNum+'</div>'+
+      '<div style="font-size:11px;color:var(--t3)">'+r.breed.split(' ')[0]+'</div>'+
+      '<div style="font-size:11px">WOP '+r.wop+'w</div>'+
+      '<div style="font-size:12px;font-weight:600;text-align:right">'+fN(r.qty)+'</div>'+
+      '<div style="font-size:11px;color:var(--gr);text-align:right">Std '+std+'%</div>'+
+      (r.flocks.length?'<div style="font-size:10px;color:var(--t3);text-align:right">'+r.flocks.join(', ')+'</div>':'<div></div>')+
+      '</div>';
+  });
+  preview += '</div>';
+  preview += '<div style="font-size:11px;color:var(--t3);margin-top:6px">'+farm+' → '+hatchery+' · Received '+fD(date)+'</div>';
+  el.innerHTML = preview;
+}
+
+async function saveDOImport(){
+  const rows = collectDORows();
+  if(!rows.length){toast('No valid flock data entered','error');return;}
+  const farm = document.getElementById('do_farm').value;
+  const hatchery = document.getElementById('do_hatchery').value;
+  const date = document.getElementById('do_date').value;
+  const isExt = farm === 'External';
+
+  const btn = document.getElementById('doSaveBtn');
+  if(btn){btn.textContent='Saving…';btn.disabled=true;}
+
+  const lots = rows.map((r,idx)=>({
+    lot_id: 'LOT-'+String(state.lots.length+idx+1).padStart(4,'0'),
+    farm,
+    hatchery,
+    breed: r.breed,
+    wop: r.wop,
+    qty_received: r.qty,
+    stock_remaining: r.qty,
+    recv_date: date,
+    is_external: isExt,
+    external_source: null,
+    status: 'cool_room',
+    created_by: state.user.id,
+  }));
+
+  const{error} = await sb.from('egg_lots').insert(lots);
+  if(error){toast(error.message,'error');if(btn){btn.textContent='Save Lots from DO';btn.disabled=false;}return;}
+
+  const totalHE = rows.reduce((s,r)=>s+r.qty,0);
+  toast('DO imported — '+lots.length+' lot'+(lots.length>1?'s':'')+', '+fN(totalHE)+' HE total');
+  closeModal();
+  await loadLots();
+  setState({page:'cool'});
 }
 
 // ── Boot ──
