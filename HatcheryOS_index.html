@@ -191,14 +191,14 @@ const FARMS=['Rantau','Sg. Sayong','Ulu Tiram','Kluang','Sg. Siput'];
 const FARM_KEYS=['farm_rantau','farm_sg_sayong','farm_ulu_tiram','farm_kluang','farm_sg_siput'];
 const HATCH=[{name:'Chengkau',typ:'SS',wc:774144},{name:'Kluang',typ:'SS',wc:345600},{name:'K.Kangsar',typ:'MS',wc:622080},{name:'Sg. Sayong',typ:'MS',wc:311040}];
 const HN=HATCH.map(h=>h.name);
-const BREEDS=['Ross 308','Cobb 500','Hubbard'];
+const BREEDS=['Ross 308','Cobb 500','Custom'];
 const BC=['cA','cB','cC'];
 const bI=b=>b==='Ross 308'?0:b==='Cobb 500'?1:2;
 const TOTAL_CAP=HATCH.reduce((s,h)=>s+h.wc,0);
 
-const STD={'Ross 308':{24:72,25:75,26:78,27:81,28:83,29:85,30:86,31:87,32:87,33:86,34:85,35:84,36:83,37:81,38:79,39:77,40:74,41:72,42:69,43:67,44:65,45:63,46:61,47:59,48:57,49:55,50:53},'Cobb 500':{24:70,25:73,26:76,27:79,28:82,29:84,30:85,31:86,32:86,33:85,34:84,35:82,36:80,37:78,38:76,39:74,40:71,41:68,42:65,43:63,44:61,45:59,46:57,47:55,48:53,49:51,50:49},'Hubbard':{24:68,25:71,26:74,27:77,28:80,29:82,30:83,31:84,32:84,33:83,34:82,35:80,36:78,37:76,38:74,39:72,40:69,41:66,42:63,43:61,44:59,45:57,46:55,47:53,48:51,49:49,50:47}};
+const STD={'Ross 308':{24:72,25:75,26:78,27:81,28:83,29:85,30:86,31:87,32:87,33:86,34:85,35:84,36:83,37:81,38:79,39:77,40:74,41:72,42:69,43:67,44:65,45:63,46:61,47:59,48:57,49:55,50:53},'Cobb 500':{24:70,25:73,26:76,27:79,28:82,29:84,30:85,31:86,32:86,33:85,34:84,35:82,36:80,37:78,38:76,39:74,40:71,41:68,42:65,43:63,44:61,45:59,46:57,47:55,48:53,49:51,50:49},'Custom':{}};
 
-const gS=(b,w)=>{const t=STD[b]||STD['Ross 308'],k=Object.keys(t).map(Number).sort((a,z)=>a-z);if(w<=k[0])return t[k[0]];if(w>=k[k.length-1])return t[k[k.length-1]];return t[w]||t[k.reduce((p,x)=>Math.abs(x-w)<Math.abs(p-w)?x:p,k[0])];};
+const gS=(b,w)=>{if(b==='Custom'||!STD[b])return 0;const t=STD[b],k=Object.keys(t).map(Number).sort((a,z)=>a-z);if(!k.length)return 0;if(w<=k[0])return t[k[0]];if(w>=k[k.length-1])return t[k[k.length-1]];return t[w]||t[k.reduce((p,x)=>Math.abs(x-w)<Math.abs(p-w)?x:p,k[0])];};
 const dc=(d,w)=>{let r=0;for(let i=1;i<=d;i++)r+=(i<=7?.2:.5)+(w>38&&i>5?.1:0);return parseFloat(r.toFixed(2));};
 const aH=(b,w,d)=>Math.max(parseFloat((gS(b,w)-dc(d,w)).toFixed(1)),0);
 const td=()=>new Date().toISOString().split('T')[0];
@@ -540,7 +540,19 @@ function pgCapacity(){return'<div><div class="gr2 mb12">'+HATCH.map(hh=>{const i
 // ══════════════════════════════════════════
 // BREED STANDARDS
 // ══════════════════════════════════════════
-function pgStandards(){return'<div class="card"><div class="ct">Hatchability Standard by Breed & WOP</div><div class="ovx"><table><thead><tr><th>WOP</th>'+BREEDS.map(b=>'<th>'+b+'</th>').join('')+'</tr></thead><tbody>'+Array.from({length:27},(_,i)=>24+i).map(wop=>'<tr><td class="mn">'+wop+'w</td>'+BREEDS.map(b=>{const v=gS(b,wop);return'<td class="mn" style="color:'+(v>=85?'var(--gr)':v>=80?'var(--am)':'var(--re)')+'">'+v+'%</td>';}).join('')+'</tr>').join('')+'</tbody></table></div></div>';}
+function pgStandards(){
+  const wops=Array.from({length:27},(_,i)=>24+i);
+  return'<div class="card mb12"><div class="ct">Hatchability Standard by Breed & WOP</div>'+
+    '<div class="al abl mb12">'+ic('info',11)+' Custom breed has no standard table — enter actual hatchability manually when recording hatch results.</div>'+
+    '<div class="ovx"><table><thead><tr><th>WOP</th>'+BREEDS.map(b=>'<th>'+b+'</th>').join('')+'</tr></thead><tbody>'+
+    wops.map(wop=>'<tr><td class="mn">'+wop+'w</td>'+
+      BREEDS.map(b=>{
+        if(b==='Custom') return'<td class="mn" style="color:var(--t3);font-style:italic">—</td>';
+        const v=gS(b,wop);
+        return'<td class="mn" style="color:'+(v>=85?'var(--gr)':v>=80?'var(--am)':'var(--re)')+'">'+v+'%</td>';
+      }).join('')+'</tr>').join('')+
+    '</tbody></table></div></div>';
+}
 
 // ══════════════════════════════════════════
 // STORAGE RESEARCH
@@ -775,39 +787,24 @@ async function deleteLot(lotId, lotLabel){
 
 // ── DO Import Modal ──
 function openDOImportModal(){
-  const n=state.lots.length+1;
-  // Build flock rows (start with 3, can add more)
-  function buildRows(count){
-    let rows='';
-    for(let i=0;i<count;i++){
-      rows+=
-        '<tr id="do-row-'+i+'">'+
-        '<td style="padding:4px 6px"><input class="inp" type="text" id="do_flock_'+i+'" placeholder="H4" style="width:52px;padding:5px 7px;font-size:12px;text-align:center"/></td>'+
-        '<td style="padding:4px 6px"><input class="inp" type="number" id="do_wop_'+i+'" placeholder="39" min="24" max="65" style="width:60px;padding:5px 7px;font-size:12px;text-align:center" oninput="doUpdatePreview()"/></td>'+
-        '<td style="padding:4px 6px"><select class="inp" id="do_breed_'+i+'" style="width:110px;padding:5px 7px;font-size:12px" onchange="doUpdatePreview()">'+
-          BREEDS.map(b=>'<option>'+b+'</option>').join('')+
-        '</select></td>'+
-        '<td style="padding:4px 6px"><input class="inp" type="number" id="do_qty_'+i+'" placeholder="3400" style="width:80px;padding:5px 7px;font-size:12px;text-align:right" oninput="doUpdatePreview()"/></td>'+
-        '<td style="padding:4px 6px;text-align:center"><button onclick="removeDoRow('+i+')" style="background:var(--rel);color:var(--re);border:1px solid rgba(248,81,73,.3);border-radius:6px;padding:3px 8px;font-size:11px;cursor:pointer">✕</button></td>'+
-        '</tr>';
-    }
-    return rows;
-  }
-
+  _doRowCount = 4;
   showModal(
     '<div class="moh">'+
-      '<span class="mot">Import from Delivery Order (DO)</span>'+
+      '<span class="mot">Import Multiple DOs</span>'+
       '<button class="btn bsec bsm" onclick="closeModal()">✕</button>'+
     '</div>'+
-    '<div class="mob">'+
+    '<div style="padding:0 18px">'+
+      '<div class="tabs" style="margin-bottom:0">'+
+        '<button class="tab act" id="tab-manual" onclick="switchDOTab(this.dataset.t)" data-t="manual">Manual Entry</button>'+
+        '<button class="tab" id="tab-excel" onclick="switchDOTab(this.dataset.t)" data-t="excel">Upload Excel (.xlsx)</button>'+
+      '</div>'+
+    '</div>'+
 
-    // Header section
+    // ── MANUAL TAB ──
+    '<div id="do-tab-manual" class="mob">'+
     '<div class="fr3 mb12">'+
       '<div class="fld"><label>From Farm</label>'+
-        '<select class="inp" id="do_farm">'+
-          FARMS.map(f=>'<option>'+f+'</option>').join('')+
-          '<option value="External">External</option>'+
-        '</select>'+
+        '<select class="inp" id="do_farm">'+FARMS.map(f=>'<option>'+f+'</option>').join('')+'<option value="External">External</option></select>'+
       '</div>'+
       '<div class="fld"><label>To Hatchery</label>'+
         '<select class="inp" id="do_hatchery">'+HN.map(h=>'<option>'+h+'</option>').join('')+'</select>'+
@@ -816,42 +813,297 @@ function openDOImportModal(){
         '<input class="inp" type="date" id="do_date" value="'+td()+'" onchange="doUpdatePreview()"/>'+
       '</div>'+
     '</div>'+
-
-    // Flock table
     '<div style="font-size:10px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Flock details — enter each flock from the DO</div>'+
     '<div class="ovx" style="margin-bottom:8px">'+
       '<table style="width:100%;min-width:420px;border-collapse:collapse">'+
-        '<thead>'+
-          '<tr style="background:var(--bg4)">'+
-            '<th style="padding:6px 8px;font-size:10px;font-family:var(--fm);text-transform:uppercase;letter-spacing:.5px;color:var(--t3);text-align:left">Flock/House</th>'+
-            '<th style="padding:6px 8px;font-size:10px;font-family:var(--fm);text-transform:uppercase;letter-spacing:.5px;color:var(--t3);text-align:left">WOP</th>'+
-            '<th style="padding:6px 8px;font-size:10px;font-family:var(--fm);text-transform:uppercase;letter-spacing:.5px;color:var(--t3);text-align:left">Breed</th>'+
-            '<th style="padding:6px 8px;font-size:10px;font-family:var(--fm);text-transform:uppercase;letter-spacing:.5px;color:var(--t3);text-align:right">Qty (HE)</th>'+
-            '<th style="padding:6px 8px;width:36px"></th>'+
-          '</tr>'+
-        '</thead>'+
-        '<tbody id="do-tbody">'+buildRows(4)+'</tbody>'+
+        '<thead><tr style="background:var(--bg4)">'+
+          '<th style="padding:6px 8px;font-size:10px;font-family:var(--fm);text-transform:uppercase;color:var(--t3);text-align:left">Flock</th>'+
+          '<th style="padding:6px 8px;font-size:10px;font-family:var(--fm);text-transform:uppercase;color:var(--t3);text-align:left">WOP</th>'+
+          '<th style="padding:6px 8px;font-size:10px;font-family:var(--fm);text-transform:uppercase;color:var(--t3);text-align:left">Breed</th>'+
+          '<th style="padding:6px 8px;font-size:10px;font-family:var(--fm);text-transform:uppercase;color:var(--t3);text-align:right">Qty (HE)</th>'+
+          '<th style="padding:6px 8px;width:36px"></th>'+
+        '</tr></thead>'+
+        '<tbody id="do-tbody">'+buildDORows(4)+'</tbody>'+
       '</table>'+
     '</div>'+
     '<button onclick="addDoRow()" class="btn bsec bsm" style="margin-bottom:14px">+ Add Flock Row</button>'+
-
-    // Preview section
     '<div id="do-preview"></div>'+
-
     '</div>'+
-    '<div class="mof">'+
+
+    // ── EXCEL TAB ──
+    '<div id="do-tab-excel" class="mob" style="display:none">'+
+      '<div class="al abl mb12">'+
+        ic('info',11)+
+        ' Upload the HatcheryOS DO Template (.xlsx). Columns required: <b>C=WOP, G=Total HE dispatched, L=Breed</b>. '+
+        'Rows 9-24 are read automatically.'+
+      '</div>'+
+      '<div class="fld mb12">'+
+        '<label>Excel DO File (.xlsx)</label>'+
+        '<input type="file" id="do_xlsx_file" accept=".xlsx,.xls" class="inp" onchange="parseDOExcel(this)" style="padding:7px"/>'+
+      '</div>'+
+      '<div id="xlsx-preview"></div>'+
+    '</div>'+
+
+    '<div class="mof" id="do-footer">'+
       '<button class="btn bsec" onclick="closeModal()">Cancel</button>'+
-      '<button class="btn bpri" id="doSaveBtn" style="min-width:140px">Save Lots from DO</button>'+
+      '<button class="btn bpri" id="doSaveBtn">Save Lots from DO</button>'+
     '</div>'
   );
 
-  // bind save
   document.getElementById('doSaveBtn').addEventListener('click', saveDOImport);
-  // initial preview
   doUpdatePreview();
 }
 
-// Track row count
+// ── Tab switch ──
+function switchDOTab(tab){
+  document.getElementById('do-tab-manual').style.display = tab==='manual'?'block':'none';
+  document.getElementById('do-tab-excel').style.display  = tab==='excel'?'block':'none';
+  document.getElementById('tab-manual').className = 'tab'+(tab==='manual'?' act':'');
+  document.getElementById('tab-excel').className  = 'tab'+(tab==='excel'?' act':'');
+  // update save button
+  const btn = document.getElementById('doSaveBtn');
+  if(btn) btn.onclick = tab==='manual' ? saveDOImport : saveExcelImport;
+}
+
+// ── Build manual rows ──
+function buildDORows(count){
+  let rows='';
+  for(let i=0;i<count;i++) rows+=makeDORow(i);
+  return rows;
+}
+function makeDORow(i){
+  return '<tr id="do-row-'+i+'">'+
+    '<td style="padding:4px 6px"><input class="inp" type="text" id="do_flock_'+i+'" placeholder="H4" style="width:52px;padding:5px 7px;font-size:12px;text-align:center"/></td>'+
+    '<td style="padding:4px 6px"><input class="inp" type="number" id="do_wop_'+i+'" placeholder="39" min="24" max="65" style="width:60px;padding:5px 7px;font-size:12px;text-align:center" oninput="doUpdatePreview()"/></td>'+
+    '<td style="padding:4px 6px"><select class="inp" id="do_breed_'+i+'" style="width:110px;padding:5px 7px;font-size:12px" onchange="doUpdatePreview()">'+
+      BREEDS.map(b=>'<option>'+b+'</option>').join('')+
+    '</select></td>'+
+    '<td style="padding:4px 6px"><input class="inp" type="number" id="do_qty_'+i+'" placeholder="3400" style="width:80px;padding:5px 7px;font-size:12px;text-align:right" oninput="doUpdatePreview()"/></td>'+
+    '<td style="padding:4px 6px;text-align:center"><button onclick="removeDoRow('+i+')" style="background:var(--rel);color:var(--re);border:1px solid rgba(248,81,73,.3);border-radius:6px;padding:3px 8px;font-size:11px;cursor:pointer">✕</button></td>'+
+    '</tr>';
+}
+
+// ── Parse Excel upload ──
+async function parseDOExcel(input){
+  const file = input.files[0];
+  if(!file) return;
+  const preview = document.getElementById('xlsx-preview');
+  preview.innerHTML = '<div style="color:var(--t3);font-size:12px">Reading file…</div>';
+
+  try {
+    const ab = await file.arrayBuffer();
+    const XLSX = await import('https://cdn.jsdelivr.net/npm/xlsx@0.18.5/+esm');
+    const wb = XLSX.read(ab, {type:'array'});
+    const ws = wb.Sheets[wb.SheetNames[0]];
+    const raw = XLSX.utils.sheet_to_json(ws, {header:1, defval:''});
+
+    // Read header info from known cells
+    const farmVal    = raw[4]?.[1] || '';  // B5
+    const hatchVal   = raw[4]?.[7] || '';  // H5
+    const dateVal    = raw[5]?.[2] || '';  // C6
+    const doNo       = raw[3]?.[8] || '';  // I4
+
+    // Data rows 9-24 = index 8-23
+    const rows = [];
+    for(let i=8; i<=23; i++){
+      const r = raw[i];
+      if(!r) continue;
+      const wop   = parseInt(r[2]);   // C
+      const totalG= parseInt(r[6]);   // G (total dispatched — formula result)
+      const breed = String(r[11]||'').trim(); // L
+      if(!wop || !totalG || !breed) continue;
+      rows.push({flock:String(r[0]||''), wop, qty:totalG, breed});
+    }
+
+    if(!rows.length){
+      preview.innerHTML = '<div class="al are">No valid data rows found. Ensure columns C (WOP), G (Total HE), L (Breed) are filled in rows 9-24.</div>';
+      return;
+    }
+
+    // Merge by breed+wop
+    const merged = {};
+    rows.forEach(r=>{
+      const k = r.breed+'|'+r.wop;
+      if(!merged[k]) merged[k]={breed:r.breed, wop:r.wop, qty:0, flocks:[]};
+      merged[k].qty += r.qty;
+      if(r.flock) merged[k].flocks.push(r.flock);
+    });
+    const lots = Object.values(merged);
+    const totalHE = lots.reduce((s,r)=>s+r.qty,0);
+
+    // Store parsed data for save
+    window._excelParsed = {farm:farmVal||'External', hatchery:hatchVal, date:dateVal, doNo, lots, raw:rows};
+
+    // Build preview
+    let html2 = '<div class="box mb8">'+
+      '<div class="row-val"><span>DO No.</span><b>'+esc(String(doNo))+'</b></div>'+
+      '<div class="row-val"><span>Farm → Hatchery</span><b>'+esc(farmVal)+' → '+esc(hatchVal)+'</b></div>'+
+      '<div class="row-val"><span>Delivery Date</span><b>'+esc(String(dateVal))+'</b></div>'+
+      '</div>';
+    html2 += '<div style="font-size:10px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">'+lots.length+' lot'+(lots.length>1?'s':'')+' detected — total '+fN(totalHE)+' HE</div>';
+    html2 += '<div style="border:1px solid var(--bor);border-radius:var(--r);overflow:hidden">';
+    lots.forEach((r,idx)=>{
+      const std=gS(r.breed,r.wop);
+      const bg=idx%2===0?'var(--bg3)':'var(--bg4)';
+      html2+='<div style="display:grid;grid-template-columns:90px 80px 110px 80px 70px 1fr;gap:0;background:'+bg+';padding:8px 12px;align-items:center">'+
+        '<div class="mn tg">LOT-'+String(state.lots.length+idx+1).padStart(4,'0')+'</div>'+
+        '<div style="font-size:11px">'+esc(r.breed.split(' ')[0])+'</div>'+
+        '<div style="font-size:11px">WOP '+r.wop+'w</div>'+
+        '<div style="font-size:12px;font-weight:600;text-align:right">'+fN(r.qty)+'</div>'+
+        '<div class="mn tg" style="text-align:right">Std '+std+'%</div>'+
+        (r.flocks.length?'<div style="font-size:10px;color:var(--t3);text-align:right">'+r.flocks.join(', ')+'</div>':'<div></div>')+
+        '</div>';
+    });
+    html2 += '</div>';
+    html2 += '<button class="btn bsec bsm" style="margin-top:10px" onclick="printParsedDO()">🖨 Print this DO</button>';
+    preview.innerHTML = html2;
+
+  } catch(err) {
+    preview.innerHTML = '<div class="al are">Error reading file: '+esc(err.message)+'</div>';
+  }
+}
+
+// ── Save Excel import ──
+async function saveExcelImport(){
+  const p = window._excelParsed;
+  if(!p||!p.lots.length){toast('No Excel data to save','error');return;}
+
+  // Try to parse date
+  let recvDate = td();
+  if(p.date){
+    try {
+      // Excel might give various date formats
+      const d = new Date(p.date);
+      if(!isNaN(d)) recvDate = d.toISOString().split('T')[0];
+    } catch(e){}
+  }
+
+  const btn = document.getElementById('doSaveBtn');
+  if(btn){btn.textContent='Saving…';btn.disabled=true;}
+
+  const lots = p.lots.map((r,idx)=>({
+    lot_id: 'LOT-'+String(state.lots.length+idx+1).padStart(4,'0'),
+    farm: p.farm||'External',
+    hatchery: p.hatchery||HN[0],
+    breed: r.breed,
+    wop: r.wop,
+    qty_received: r.qty,
+    stock_remaining: r.qty,
+    recv_date: recvDate,
+    is_external: p.farm==='External',
+    external_source: null,
+    status: 'cool_room',
+    created_by: state.user.id,
+  }));
+
+  const{error}=await sb.from('egg_lots').insert(lots);
+  if(error){toast(error.message,'error');if(btn){btn.textContent='Save Lots from DO';btn.disabled=false;}return;}
+
+  const totalHE = p.lots.reduce((s,r)=>s+r.qty,0);
+  toast('Excel DO imported — '+lots.length+' lots, '+fN(totalHE)+' HE');
+  closeModal();
+  await loadLots();
+  setState({page:'cool'});
+}
+
+// ── Print DO (from manual entry) ──
+function printManualDO(){
+  const farm = document.getElementById('do_farm')?.value||'';
+  const hatchery = document.getElementById('do_hatchery')?.value||'';
+  const date = document.getElementById('do_date')?.value||td();
+  const rows = collectDORows();
+  if(!rows.length){toast('No data to print','error');return;}
+  openDOPrintWindow(farm, hatchery, date, rows, '—');
+}
+
+// ── Print DO (from Excel parse) ──
+function printParsedDO(){
+  const p = window._excelParsed;
+  if(!p) return;
+  openDOPrintWindow(p.farm, p.hatchery, String(p.date), p.lots, String(p.doNo));
+}
+
+function openDOPrintWindow(farm, hatchery, date, rows, doNo){
+  const totalHE = rows.reduce((s,r)=>s+r.qty,0);
+  const dateStr = date ? new Date(date).toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'2-digit'}) : '—';
+  let rowsHTML = rows.map((r,i)=>`
+    <tr>
+      <td>${i+1}</td><td></td><td>${r.wop||''}</td><td></td>
+      <td></td><td></td><td style="font-weight:700">${fN(r.qty)}</td>
+      <td></td><td></td><td></td><td></td>
+      <td style="font-weight:700;color:#1A3A6B">${esc(r.breed)}</td>
+    </tr>`).join('');
+  const flockNote = rows.map(r=>(r.flocks&&r.flocks.length?r.flocks.join(','):'')+'→'+r.breed).filter(Boolean).join('   ');
+
+  const w = window.open('','_blank','width=900,height=700');
+  w.document.write(`<!DOCTYPE html><html><head><title>Delivery Order</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:Arial,sans-serif;font-size:10pt;padding:12mm 14mm;background:#fff;color:#000}
+    .co{text-align:center;background:#1A3A6B;color:#fff;font-size:13pt;font-weight:700;padding:7px 0;letter-spacing:.5px}
+    .sub{text-align:center;background:#2B5BA8;color:#fff;font-size:9pt;font-weight:700;padding:3px 0}
+    .meta{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin:6px 0;font-size:9.5pt}
+    .meta-row{display:flex;gap:6px;align-items:baseline;padding:2px 0;border-bottom:1px solid #ddd}
+    .meta-label{font-weight:700;white-space:nowrap;min-width:110px}
+    .meta-val{border-bottom:1px solid #333;flex:1;min-height:16px;font-style:italic}
+    .do-no{text-align:right;font-size:13pt;font-weight:700;color:#C0392B;border-bottom:2px solid #C0392B;min-width:80px;display:inline-block}
+    table{width:100%;border-collapse:collapse;margin-top:6px;font-size:9pt}
+    th{background:#2B5BA8;color:#fff;padding:5px 6px;border:1px solid #1A3A6B;text-align:center;font-size:8.5pt}
+    td{border:1px solid #bbb;padding:4px 6px;text-align:center;height:20px}
+    .total-row td{background:#D6E4F7;font-weight:700;border:1px solid #1A3A6B}
+    .remarks{margin-top:8px;font-size:9pt}
+    .sig{display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;margin-top:20px}
+    .sig-box{border-top:2px solid #000;padding-top:3px;font-size:8.5pt;font-weight:700;color:#444}
+    .legend{font-size:7.5pt;color:#888;margin-top:4px;text-align:center;font-style:italic}
+    @media print{@page{size:A4 landscape;margin:10mm}body{padding:8mm 10mm}}
+  </style></head><body>
+  <div class="co">CHAROEN POKPHAND JAYA FARM (M) SDN. BHD. &nbsp;<small style="font-size:8pt">(166360-H)</small></div>
+  <div class="sub">DELIVERY, RECEIVED SHEET</div>
+  <div style="display:flex;justify-content:flex-end;margin-top:4px;margin-bottom:2px">
+    <span style="font-size:9pt;margin-right:6px;font-weight:700">No.</span>
+    <span class="do-no">${esc(doNo)}</span>
+  </div>
+  <div class="meta">
+    <div><div class="meta-row"><span class="meta-label">FROM :</span><span class="meta-val">${esc(farm)}</span></div></div>
+    <div><div class="meta-row"><span class="meta-label">HATCHERY :</span><span class="meta-val">${esc(hatchery)}</span></div></div>
+    <div><div class="meta-row"><span class="meta-label">DELIVERY DATE :</span><span class="meta-val">${esc(dateStr)}</span></div></div>
+    <div><div class="meta-row"><span class="meta-label">RECEIVED DATE :</span><span class="meta-val"></span></div></div>
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th rowspan="2">FLOCK</th><th rowspan="2">HOUSE</th>
+        <th rowspan="2">WK OF<br>PROD</th><th rowspan="2">H.E.<br>AGE</th>
+        <th colspan="3">QUANTITY (Dispatched)</th>
+        <th colspan="3">QUANTITY (Received)</th>
+        <th rowspan="2">DAMAGED</th><th rowspan="2">BREED ★</th>
+      </tr>
+      <tr><th>TRAY</th><th>EGG</th><th>TOTAL</th><th>TRAY</th><th>EGG</th><th>TOTAL</th></tr>
+    </thead>
+    <tbody>${rowsHTML}</tbody>
+    <tfoot>
+      <tr class="total-row">
+        <td colspan="4" style="text-align:center;font-size:9pt">TOTAL</td>
+        <td></td><td></td><td style="font-weight:700">${fN(totalHE)}</td>
+        <td></td><td></td><td></td><td></td><td></td>
+      </tr>
+    </tfoot>
+  </table>
+  <div class="remarks">
+    <b>REMARKS :</b>&nbsp;&nbsp;${esc(flockNote)}<br><br>
+    <span style="border-bottom:1px solid #999;display:inline-block;width:100%;min-height:14px"></span>
+  </div>
+  <div class="sig">
+    <div class="sig-box">ISSUED BY :</div>
+    <div class="sig-box">DRIVER :</div>
+    <div class="sig-box">RECEIVED BY :</div>
+  </div>
+  <div class="legend">★ BREED required for HatcheryOS import &nbsp;|&nbsp; Hatchery copy</div>
+  <scr'+'ipt>window.onload=()=>{window.print();}</scr'+'ipt>
+  </body></html>`);
+  w.document.close();
+}
+
 let _doRowCount = 4;
 
 function addDoRow(){
@@ -860,15 +1112,11 @@ function addDoRow(){
   if(!tbody) return;
   const tr = document.createElement('tr');
   tr.id = 'do-row-'+i;
-  tr.innerHTML =
-    '<td style="padding:4px 6px"><input class="inp" type="text" id="do_flock_'+i+'" placeholder="H.." style="width:52px;padding:5px 7px;font-size:12px;text-align:center"/></td>'+
-    '<td style="padding:4px 6px"><input class="inp" type="number" id="do_wop_'+i+'" placeholder="39" min="24" max="65" style="width:60px;padding:5px 7px;font-size:12px;text-align:center" oninput="doUpdatePreview()"/></td>'+
-    '<td style="padding:4px 6px"><select class="inp" id="do_breed_'+i+'" style="width:110px;padding:5px 7px;font-size:12px" onchange="doUpdatePreview()">'+
-      BREEDS.map(b=>'<option>'+b+'</option>').join('')+
-    '</select></td>'+
-    '<td style="padding:4px 6px"><input class="inp" type="number" id="do_qty_'+i+'" placeholder="0" style="width:80px;padding:5px 7px;font-size:12px;text-align:right" oninput="doUpdatePreview()"/></td>'+
-    '<td style="padding:4px 6px;text-align:center"><button onclick="removeDoRow('+i+')" style="background:var(--rel);color:var(--re);border:1px solid rgba(248,81,73,.3);border-radius:6px;padding:3px 8px;font-size:11px;cursor:pointer">✕</button></td>';
-  tbody.appendChild(tr);
+  tr.innerHTML = makeDORow(i).replace(/^<tr[^>]*>/,'').replace(/<\/tr>$/,'');
+  // actually just append as innerHTML row
+  const tmp = document.createElement('tbody');
+  tmp.innerHTML = makeDORow(i);
+  tbody.appendChild(tmp.firstChild);
   doUpdatePreview();
 }
 
@@ -878,58 +1126,50 @@ function removeDoRow(i){
 }
 
 function collectDORows(){
-  // collect all visible rows, merge by breed+WOP
   const merged = {};
   for(let i=0; i<_doRowCount; i++){
     const wopEl = document.getElementById('do_wop_'+i);
     const qtyEl = document.getElementById('do_qty_'+i);
     const breedEl = document.getElementById('do_breed_'+i);
-    if(!wopEl || !qtyEl || !breedEl) continue;
-    const wop = parseInt(wopEl.value)||0;
-    const qty = parseInt(qtyEl.value)||0;
-    const breed = breedEl.value;
-    if(!wop || !qty) continue;
-    const key = breed+'|'+wop;
+    if(!wopEl||!qtyEl||!breedEl) continue;
+    const wop=parseInt(wopEl.value)||0, qty=parseInt(qtyEl.value)||0, breed=breedEl.value;
+    if(!wop||!qty) continue;
+    const key=breed+'|'+wop;
     if(!merged[key]) merged[key]={breed,wop,qty:0,flocks:[]};
-    merged[key].qty += qty;
-    const flockEl = document.getElementById('do_flock_'+i);
-    if(flockEl?.value) merged[key].flocks.push(flockEl.value);
+    merged[key].qty+=qty;
+    const fl=document.getElementById('do_flock_'+i);
+    if(fl?.value) merged[key].flocks.push(fl.value);
   }
   return Object.values(merged);
 }
 
 function doUpdatePreview(){
-  const rows = collectDORows();
-  const el = document.getElementById('do-preview');
+  const rows=collectDORows(), el=document.getElementById('do-preview');
   if(!el) return;
-  if(!rows.length){
-    el.innerHTML = '<div class="box" style="color:var(--t3);font-size:12px">Enter flock details above to preview lots</div>';
-    return;
-  }
-  const farm = document.getElementById('do_farm')?.value||'';
-  const hatchery = document.getElementById('do_hatchery')?.value||'';
-  const date = document.getElementById('do_date')?.value||td();
-  const totalHE = rows.reduce((s,r)=>s+r.qty,0);
-
-  let preview = '<div style="font-size:10px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Preview — '+rows.length+' lot'+(rows.length>1?'s':'')+' will be created (total: '+fN(totalHE)+' HE)</div>';
-  preview += '<div style="border:1px solid var(--bor);border-radius:var(--r);overflow:hidden">';
+  if(!rows.length){el.innerHTML='<div class="box" style="color:var(--t3);font-size:12px">Enter flock details above to preview lots</div>';return;}
+  const farm=document.getElementById('do_farm')?.value||'';
+  const hatchery=document.getElementById('do_hatchery')?.value||'';
+  const date=document.getElementById('do_date')?.value||td();
+  const totalHE=rows.reduce((s,r)=>s+r.qty,0);
+  let p='<div style="font-size:10px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Preview — '+rows.length+' lot'+(rows.length>1?'s':'')+' · total '+fN(totalHE)+' HE</div>';
+  p+='<div style="border:1px solid var(--bor);border-radius:var(--r);overflow:hidden">';
   rows.forEach((r,idx)=>{
-    const std = gS(r.breed, r.wop);
-    const lotNum = String(state.lots.length + idx + 1).padStart(4,'0');
-    const bg = idx%2===0?'var(--bg3)':'var(--bg4)';
-    preview +=
-      '<div style="display:grid;grid-template-columns:90px 70px 110px 80px 80px 1fr;gap:0;background:'+bg+';padding:8px 12px;align-items:center">'+
-      '<div style="font-size:11px;font-family:var(--fm);color:var(--tg, var(--gr))">LOT-'+lotNum+'</div>'+
-      '<div style="font-size:11px;color:var(--t3)">'+r.breed.split(' ')[0]+'</div>'+
+    const std=gS(r.breed,r.wop), lotNum=String(state.lots.length+idx+1).padStart(4,'0');
+    const bg=idx%2===0?'var(--bg3)':'var(--bg4)';
+    p+='<div style="display:grid;grid-template-columns:90px 70px 110px 80px 80px 1fr;gap:0;background:'+bg+';padding:8px 12px;align-items:center">'+
+      '<div class="mn tg">LOT-'+lotNum+'</div>'+
+      '<div style="font-size:11px">'+r.breed.split(' ')[0]+'</div>'+
       '<div style="font-size:11px">WOP '+r.wop+'w</div>'+
       '<div style="font-size:12px;font-weight:600;text-align:right">'+fN(r.qty)+'</div>'+
-      '<div style="font-size:11px;color:var(--gr);text-align:right">Std '+std+'%</div>'+
+      '<div class="mn tg" style="text-align:right">Std '+std+'%</div>'+
       (r.flocks.length?'<div style="font-size:10px;color:var(--t3);text-align:right">'+r.flocks.join(', ')+'</div>':'<div></div>')+
       '</div>';
   });
-  preview += '</div>';
-  preview += '<div style="font-size:11px;color:var(--t3);margin-top:6px">'+farm+' → '+hatchery+' · Received '+fD(date)+'</div>';
-  el.innerHTML = preview;
+  p+='</div><div style="font-size:11px;color:var(--t3);margin-top:6px;display:flex;align-items:center;justify-content:space-between">'+
+    '<span>'+esc(farm)+' → '+esc(hatchery)+' · '+fD(date)+'</span>'+
+    '<button class="btn bsec bsm" onclick="printManualDO()">🖨 Print DO</button>'+
+    '</div>';
+  el.innerHTML=p;
 }
 
 async function saveDOImport(){
