@@ -703,16 +703,26 @@ async function saveOpeningStock(hatcheryName, weekNo){
 function openEditLotModal(lotId){
   const l=state.lots.find(x=>x.id===lotId);
   if(!l) return;
+  const isExt=l.is_external||l.farm==='External';
+  let farmOpts=FARMS.map(f=>'<option value="'+f+'"'+(!isExt&&l.farm===f?' selected':'')+'>'+f+'</option>').join('');
+  farmOpts+='<option value="External"'+(isExt?' selected':'')+'>External</option>';
+  let hatchOpts=HN.map(h=>'<option'+(l.hatchery===h?' selected':'')+'>'+h+'</option>').join('');
+  let breedOpts=BREEDS.map(b=>'<option'+(l.breed===b?' selected':'')+'>'+b+'</option>').join('');
+  let extStyle=isExt?'block':'none';
+  let extVal=esc(l.external_source||'');
   showModal(
-    '<div class="moh"><span class="mot">Edit Lot — '+esc(l.lot_id)+'</span><button class="btn bsec bsm" onclick="closeModal()">✕</button></div>'+
+    '<div class="moh"><span class="mot">Edit Lot — '+esc(l.lot_id)+'</span><button class="btn bsec bsm" onclick="closeModal()">&#x2715;</button></div>'+
     '<div class="mob">'+
-    '<div class="al abl mb12">'+ic('info',11)+' Only lots with Cool Room status can be edited</div>'+
+    '<div class="al abl mb12">Only lots with Cool Room status can be edited</div>'+
     '<div class="fr2 mb12">'+
-      '<div class="fld"><label>Farm</label><select class="inp" id="el_farm">'+FARMS.map(f=>'<option'+(l.farm===f?' selected':'')+'>'+f+'</option>').join('')+'<option'+(l.is_external?' selected':'')+' value="External">External</option></select></div>'+
-      '<div class="fld"><label>Hatchery</label><select class="inp" id="el_hatchery">'+HN.map(h=>'<option'+(l.hatchery===h?' selected':'')+'>'+h+'</option>').join('')+'</select></div>'+
+      '<div class="fld"><label>Source</label>'+
+        '<select class="inp" id="el_farm" onchange="toggleEditSrc(this.value)">'+farmOpts+'</select>'+
+        '<input class="inp" type="text" id="el_ext_name" placeholder="Supplier name" value="'+extVal+'" style="margin-top:6px;display:'+extStyle+'"/>'+
+      '</div>'+
+      '<div class="fld"><label>Hatchery</label><select class="inp" id="el_hatchery">'+hatchOpts+'</select></div>'+
     '</div>'+
     '<div class="fr2 mb12">'+
-      '<div class="fld"><label>Breed</label><select class="inp" id="el_breed">'+BREEDS.map(b=>'<option'+(l.breed===b?' selected':'')+'>'+b+'</option>').join('')+'</select></div>'+
+      '<div class="fld"><label>Breed</label><select class="inp" id="el_breed">'+breedOpts+'</select></div>'+
       '<div class="fld"><label>WOP</label><input class="inp" type="number" id="el_wop" value="'+l.wop+'" min="24" max="65"/></div>'+
     '</div>'+
     '<div class="fr3 mb12">'+
@@ -723,12 +733,22 @@ function openEditLotModal(lotId){
     '</div>'+
     '<div class="mof"><button class="btn bsec" onclick="closeModal()">Cancel</button><button class="btn bpri" id="saveEditLotBtn">Save Changes</button></div>'
   );
-  document.getElementById('saveEditLotBtn').addEventListener('click', ()=>saveEditLot(lotId));
+  document.getElementById('saveEditLotBtn').addEventListener('click',()=>saveEditLot(lotId));
+}
+
+function toggleEditSrc(val){
+  const el=document.getElementById('el_ext_name');
+  if(el) el.style.display=val==='External'?'block':'none';
 }
 
 async function saveEditLot(lotId){
+  const farmVal=document.getElementById('el_farm').value;
+  const isExt=farmVal==='External';
+  const extName=document.getElementById('el_ext_name')?.value||'';
   const d={
-    farm: document.getElementById('el_farm').value,
+    farm: isExt?'External':farmVal,
+    is_external: isExt,
+    external_source: isExt?extName:null,
     hatchery: document.getElementById('el_hatchery').value,
     breed: document.getElementById('el_breed').value,
     wop: parseInt(document.getElementById('el_wop').value)||0,
@@ -740,7 +760,7 @@ async function saveEditLot(lotId){
   if(!d.wop){toast('Please enter WOP','error');return;}
   const{error}=await sb.from('egg_lots').update(d).eq('id',lotId);
   if(error){toast(error.message,'error');return;}
-  toast('Lot updated');
+  toast('Lot updated successfully');
   closeModal();
   await loadLots();
 }
