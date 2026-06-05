@@ -667,12 +667,12 @@ function openOpeningStockModal(hatcheryName){
 
   let html='<div class="moh"><span class="mot">Opening Stock — '+esc(hatcheryName)+'</span><button class="btn bsec bsm" onclick="closeModal()">✕</button></div>'+
     '<div class="mob">'+
-    '<div class="al abl mb12">'+ic('info',11)+' สต็อคไข่ยกมาจากสัปดาห์ที่แล้ว (W'+prevWkNo+') แยกตามฟาร์มและสายพันธุ์</div>'+
+    '<div class="al abl mb12">'+ic('info',11)+' Previous week opening stock (W'+prevWkNo+') — by farm and breed</div>'+
     '<div class="ovx"><table style="width:100%;min-width:500px"><thead><tr>'+thCells+'</tr></thead><tbody>'+tableRows+'</tbody>'+
-    '<tfoot><tr><td colspan="'+(BREEDS.length+1)+'" style="padding:10px;font-size:11px;color:var(--t3)">กรอก 0 ถ้าไม่มีสต็อคจากฟาร์มนั้น</td></tr></tfoot></table></div></div>'+
+    '<tfoot><tr><td colspan="'+(BREEDS.length+1)+'" style="padding:10px;font-size:11px;color:var(--t3)">Enter 0 if no stock from that farm</td></tr></tfoot></table></div></div>'+
     '<div class="mof">'+
     '<button class="btn bsec" onclick="closeModal()">Cancel</button>'+
-    '<button class="btn bpri" id="saveOSBtn">บันทึก Opening Stock</button>'+
+    '<button class="btn bpri" id="saveOSBtn">Save Opening Stock</button>'+
     '</div>';
 
   showModal(html);
@@ -706,7 +706,7 @@ function openEditLotModal(lotId){
   showModal(
     '<div class="moh"><span class="mot">Edit Lot — '+esc(l.lot_id)+'</span><button class="btn bsec bsm" onclick="closeModal()">✕</button></div>'+
     '<div class="mob">'+
-    '<div class="al abl mb12">'+ic('info',11)+' แก้ไขได้เฉพาะ lot ที่ยังอยู่ใน Cool Room เท่านั้น</div>'+
+    '<div class="al abl mb12">'+ic('info',11)+' Only lots with Cool Room status can be edited</div>'+
     '<div class="fr2 mb12">'+
       '<div class="fld"><label>Farm</label><select class="inp" id="el_farm">'+FARMS.map(f=>'<option'+(l.farm===f?' selected':'')+'>'+f+'</option>').join('')+'<option'+(l.is_external?' selected':'')+' value="External">External</option></select></div>'+
       '<div class="fld"><label>Hatchery</label><select class="inp" id="el_hatchery">'+HN.map(h=>'<option'+(l.hatchery===h?' selected':'')+'>'+h+'</option>').join('')+'</select></div>'+
@@ -721,7 +721,7 @@ function openEditLotModal(lotId){
       '<div class="fld"><label>Received Date</label><input class="inp" type="date" id="el_date" value="'+l.recv_date+'"/></div>'+
     '</div>'+
     '</div>'+
-    '<div class="mof"><button class="btn bsec" onclick="closeModal()">Cancel</button><button class="btn bpri" id="saveEditLotBtn">บันทึกการแก้ไข</button></div>'
+    '<div class="mof"><button class="btn bsec" onclick="closeModal()">Cancel</button><button class="btn bpri" id="saveEditLotBtn">Save Changes</button></div>'
   );
   document.getElementById('saveEditLotBtn').addEventListener('click', ()=>saveEditLot(lotId));
 }
@@ -737,7 +737,7 @@ async function saveEditLot(lotId){
     recv_date: document.getElementById('el_date').value,
     updated_at: new Date().toISOString(),
   };
-  if(!d.wop){toast('กรุณาใส่ WOP','error');return;}
+  if(!d.wop){toast('Please enter WOP','error');return;}
   const{error}=await sb.from('egg_lots').update(d).eq('id',lotId);
   if(error){toast(error.message,'error');return;}
   toast('Lot updated');
@@ -746,10 +746,10 @@ async function saveEditLot(lotId){
 }
 
 async function deleteLot(lotId, lotLabel){
-  if(!confirm('ลบ Lot '+lotLabel+' ออกจากระบบ?\nการลบไม่สามารถย้อนกลับได้')) return;
+  if(!confirm('Delete Lot '+lotLabel+'?\nThis action cannot be undone.')) return;
   const{error}=await sb.from('egg_lots').delete().eq('id',lotId);
   if(error){toast(error.message,'error');return;}
-  toast('Lot '+lotLabel+' ลบแล้ว');
+  toast('Lot '+lotLabel+' deleted');
   await loadLots();
 }
 
